@@ -31,30 +31,35 @@ input[type=text],input[type=number]{font:inherit;width:100%;padding:10px;border-
 
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.chip.on{background:var(--hot);color:#0d1b2a;border-color:var(--hot);font-weight:700}
 .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--hot);transition:width .3s}
-.arena{position:relative;height:290px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(#050b14,#141039 70%,#2a1450)}
+.arena{position:relative;height:340px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(#050b14,#141039 70%,#2a1450)}
 .stars{position:absolute;inset:0;animation:drift 18s linear infinite}
 .s1{background:radial-gradient(circle,#fff9 1px,transparent 1.5px) 0 0/60px 50px}
 .s2{background:radial-gradient(circle,#fffc 1.5px,transparent 2px) 20px 0/110px 90px;animation:drift2 9s linear infinite}
 @keyframes drift{to{background-position-y:500px}}@keyframes drift2{to{background-position-y:450px}}
 .planet{position:absolute;right:-40px;bottom:-60px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ffb703,#c2410c 45%,#4a1d0a);opacity:.55;box-shadow:0 0 40px #ff7a1855}
-.ship{position:absolute;top:44px;left:2%;width:58%;animation:sweep 7s ease-in-out infinite alternate}
-.ship::after{content:"";position:absolute;top:100%;left:20%;width:60%;height:70px;background:linear-gradient(#ffb70333,transparent);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
 .dome{position:relative;z-index:1;width:76px;height:40px;margin:0 auto -12px;border-radius:76px 76px 0 0;background:radial-gradient(circle at 35% 30%,#fff,#7fe9d0 20%,#2ec4a055 70%);border:2px solid #9ff;border-bottom:0;box-shadow:0 0 16px #2ec4a0aa}
 .hull{position:relative;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:20px 22px 16px;border-radius:50px;background:linear-gradient(#4a6a8c,#1e344d 60%,#142538);border:2px solid var(--hot);box-shadow:0 0 18px #ffb70066,inset 0 2px 6px #fff4;color:#e6edf5}
 .lights{display:flex;justify-content:space-around;padding:0 14%;margin-top:-8px;position:relative}
 .lights i{width:9px;height:9px;border-radius:50%;background:var(--hot);box-shadow:0 0 8px var(--hot);animation:blink 1s infinite}
 .lights i:nth-child(2n){animation-delay:.3s}.lights i:nth-child(3n){animation-delay:.6s}
 @keyframes blink{50%{opacity:.25}}
-.w{padding:3px 10px;border-radius:8px;background:#0a1624;border:1px solid #5b7a99;font-size:.9rem;text-shadow:0 0 6px #7fe9d088}
-.w.dead{text-decoration:line-through;opacity:.4;border-color:var(--bad);color:var(--bad)}.w.hit{background:var(--ok);color:#0d1b2a;box-shadow:0 0 14px var(--ok)}
-.ship.hurt{animation:sweep 7s ease-in-out infinite alternate,hurt .35s}
-.ship.boom{animation:sweep 7s ease-in-out infinite alternate,boom .6s forwards;animation-play-state:paused,running}
-@keyframes sweep{to{left:40%}}
 @keyframes boom{50%{transform:scale(1.25);filter:brightness(3)}to{transform:scale(1.7);opacity:0;filter:brightness(5)}}
-@keyframes hurt{25%{transform:translateX(-8px);filter:drop-shadow(0 0 10px var(--bad))}75%{transform:translateX(8px);filter:drop-shadow(0 0 10px var(--bad))}}
 .beam{position:absolute;width:4px;transform-origin:50% 100%;border-radius:4px;background:linear-gradient(#fff,var(--ok));box-shadow:0 0 10px var(--ok);opacity:0;pointer-events:none;z-index:1}
 .beam.bad{background:linear-gradient(#fff,var(--bad));box-shadow:0 0 10px var(--bad)}.beam.on{animation:zap .28s forwards}@keyframes zap{from{opacity:1}to{opacity:0}}
 .gun{position:absolute;bottom:8px;left:calc(50% - 22px);width:44px;height:48px;z-index:2}
 .base{position:absolute;bottom:0;left:0;right:0;height:16px;border-radius:12px 12px 4px 4px;background:linear-gradient(#8fa6bd,#3a5068);border:2px solid var(--hot);z-index:2}
 .barrel{position:absolute;bottom:12px;left:50%;width:10px;height:34px;margin-left:-5px;border-radius:5px 5px 2px 2px;background:linear-gradient(90deg,#5b7a99,#cfe0f0,#5b7a99);transform-origin:50% 100%;transition:transform .12s;z-index:1}
 @media(prefers-reduced-motion:reduce){.ship,.stars,.lights i{animation:none}.in{transition:none}}
+
+.mother{position:absolute;top:6px;left:calc(50% - 110px);width:220px}
+.mother::after{content:"";position:absolute;top:100%;left:20%;width:60%;height:70px;background:linear-gradient(#ffb70333,transparent);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
+.mother .hull{min-height:22px;padding:8px}
+.drone{position:absolute;left:0;top:0;z-index:1;padding:4px 12px;border-radius:10px;background:linear-gradient(#26405c,#10223a);border:1px solid #5fd7ff;box-shadow:0 0 10px #5fd7ff66;font-size:.9rem;white-space:nowrap;color:#e6edf5;will-change:translate}
+.drone::before{content:"";position:absolute;left:50%;top:-6px;width:2px;height:6px;margin-left:-1px;background:#5fd7ff}
+.drone::after{content:"";position:absolute;left:25%;right:25%;top:100%;height:8px;background:linear-gradient(#ffb703,transparent);border-radius:0 0 8px 8px;opacity:.8;animation:flame .15s infinite alternate}
+@keyframes flame{to{opacity:.35;height:5px}}
+.drone.shield{animation:shield .4s}@keyframes shield{50%{box-shadow:0 0 18px 4px #8ff;background:#2b5a75}}
+.drone.hit{background:var(--ok);color:#0d1b2a;box-shadow:0 0 14px var(--ok)}.drone.boom{animation:boom .6s forwards}
+.arena.breach{animation:sh .4s;box-shadow:0 0 24px var(--bad)}
+.bk{padding:3px 10px;border:1px dashed var(--mute);border-radius:8px}
+select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px;margin:2px 0 10px;max-width:100%}
