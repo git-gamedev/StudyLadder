@@ -1,4 +1,4 @@
-const $=s=>document.querySelector(s),V=$('#v');let S=null,lv=0,Q={},F={},G={};
+const $=s=>document.querySelector(s),V=$('#v');let S=null,lv=0,Q={},F={},G={},L={2:12,3:20,4:20};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
 const sh=a=>{a=[...a];for(let i=a.length;i>1;i--){const j=Math.random()*i|0;[a[i-1],a[j]]=[a[j],a[i-1]]}return a};
 const norm=s=>String(s).toLowerCase().replace(/\(.*?\)/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\b(the|a|an)\b/g,'').replace(/\b1\b/g,'i').replace(/\b2\b/g,'ii').replace(/\s+/g,' ').trim();
@@ -18,7 +18,11 @@ const mask=t=>{let s=t.definition;const v=new Set([t.term,t.term.replace(/\s*\(.
 const decoys=(t,n)=>{const src=S.pool.length>=6?S.pool:S.all,f=forms(t),o=src.filter(x=>x!==t&&!forms(x).some(y=>f.includes(y)));return[...sh(o.filter(x=>x.category==t.category)),...sh(o.filter(x=>x.category!=t.category))].slice(0,n)};
 
 function nav(){$('#nav').innerHTML=['Setup','1 Flashcards','2 Shooter','3 Multiple choice','4 Free response'].map((n,i)=>`<button class="${i==lv?'on':''}" ${S||i==0?'':'disabled'} onclick="go(${i})">${n}</button>`).join('')}
-function go(l){lv=l;nav();[setup,flash,shoot,mcq,free][l]()}
+function go(l){lv=l;nav();l>=2?intro(l):[setup,flash][l]()}
+const NM={2:'Level 2: Shooter',3:'Level 3: Multiple choice',4:'Level 4: Free response'};
+function intro(l){const n=S.pool.length;L[l]=Math.max(1,Math.min(L[l],n));const o=[5,10,15,20,30,50].filter(x=>x<n).concat(n);
+V.innerHTML=`<div class="q"><h2>${NM[l]}</h2><p class="mute">How many ${l==2?'ships':'questions'} do you want? (${n} terms available)</p><div class="chips">${o.map(x=>`<button class="chip ${L[l]==x?'on':''}" onclick="sl(${l},${x})">${x==n?'All ('+n+')':x}</button>`).join('')}</div><div class="row"><label>Custom: <input type="number" id="ln" min="1" max="${n}" value="${L[l]}" onchange="sl(${l},this.value)" style="width:5em"></label></div><div class="row"><button class="pri" onclick="[0,0,shoot,mcq,free][${l}]()">Start (${L[l]})</button></div></div>`}
+function sl(l,x){L[l]=Math.max(1,Math.min(+x||1,S.pool.length));intro(l)}
 function setup(){V.innerHTML=`<div class="drop" id="dz"><p><b>Drop your study JSON here</b></p><p class="mute">Format: {"title": "...", "terms": [{"term", "definition", "category", "aliases"}]}. Only <code>term</code> and <code>definition</code> are required.</p><input type="file" id="fi" accept=".json,application/json" aria-label="Choose JSON file"><p class="err" id="er"></p></div><div class="q"><h2>No JSON yet?</h2><p class="mute">Download the prompt, give it to any AI together with your notes, and save the JSON it returns.</p><button id="pd" type="button">Download AI prompt (.txt)</button></div><div id="info"></div>`;$('#pd').onclick=dlPrompt;
 const dz=$('#dz');dz.ondragover=e=>{e.preventDefault();dz.classList.add('over')};dz.ondragleave=()=>dz.classList.remove('over');
 dz.ondrop=e=>{e.preventDefault();rd(e.dataTransfer.files[0])};$('#fi').onchange=e=>rd(e.target.files[0]);info()}
@@ -44,26 +48,32 @@ document.addEventListener('keydown',e=>{if(lv!=1||e.target.tagName=='INPUT')retu
 function done(title,right,total,miss,next){const pct=Math.round(100*right/total);V.innerHTML=`<div class="q"><h2>${title}</h2><p><b>${right} / ${total}</b> (${pct}%)</p>${miss.length?'<p>Review these:</p>'+miss.map(m=>`<p><b>${esc(m.term)}</b><br><span class="mute">${esc(m.definition)}</span></p>`).join(''):'<p>Perfect run.</p>'}<div class="row"><button class="pri" onclick="go(lv)">Play again</button>${next?`<button onclick="go(${lv+1})">Next level</button>`:''}</div></div>`}
 
 /* Level 2 */
-function shoot(){G={q:sh(S.pool).slice(0,12),i:0,lives:3,score:0};ship()}
+const hearts=()=>'♥'.repeat(G.lives)+'♡'.repeat(3-G.lives),words=()=>[...document.querySelectorAll('.w')];
+function shoot(){G={q:sh(S.pool).slice(0,L[2]),i:0,lives:3,score:0};ship()}
 function ship(){const t=G.q[G.i];G.t=t;G.dc=0;G.busy=false;G.w=sh([{x:t,c:1},...decoys(t,4).map(x=>({x}))]);sr()}
-function sr(msg){V.innerHTML=`<div class="hud"><span>Ship ${G.i+1} / ${G.q.length} · Score ${G.score}</span><span class="lives" aria-label="${G.lives} lives">${'♥'.repeat(G.lives)}${'♡'.repeat(3-G.lives)}</span></div><div class="q"><b>Type the word on the ship that matches:</b><p>${mask(G.t)}</p></div>
-<div class="arena"><div class="ship" id="sp">${G.w.map(w=>`<span class="w ${w.dead?'dead':''} ${w.hit?'hit':''}">${esc(w.x.term)}</span>`).join('')}</div><div class="gun">🔫</div></div>
+function sr(msg){V.innerHTML=`<div class="hud"><span>Ship ${G.i+1} / ${G.q.length} · Score ${G.score}</span><span class="lives" id="lv" aria-label="lives">${hearts()}</span></div><div class="bar"><i style="width:${100*G.i/G.q.length}%"></i></div><div class="q"><b>Type the word on the ship that matches:</b><p>${mask(G.t)}</p></div>
+<div class="arena"><div class="stars s1"></div><div class="stars s2"></div><div class="planet"></div><div class="beam" id="bm"></div><div class="ship" id="sp"><div class="dome"></div><div class="hull">${G.w.map(w=>`<span class="w">${esc(w.x.term)}</span>`).join('')}</div><div class="lights"><i></i><i></i><i></i><i></i><i></i></div></div><div class="gun"><i class="barrel"></i><i class="base"></i></div></div>
 <form onsubmit="return fire()" class="row" style="margin-bottom:0"><input type="text" id="ty" autocomplete="off" placeholder="Type a word and press Enter" aria-label="Your answer"><button class="pri">Fire</button></form><p id="ms" class="mute">${msg||'Shoot decoys by mistake and you will lose lives. Typing a word not on the ship does nothing.'}</p>`;$('#ty').focus()}
-function fire(){if(G.busy)return false;const v=$('#ty').value,c=G.w.find(w=>w.c);
-if(ok(v,G.t)){G.busy=true;c.hit=true;G.score++;$('#sp').classList.add('boom');setTimeout(()=>{G.i++;G.i>=G.q.length?done('Mission complete',G.score,G.q.length,[],true):ship()},650);return false}
+function laser(good){const A=$('.arena').getBoundingClientRect(),P=$('#sp').getBoundingClientRect(),g=$('.gun').getBoundingClientRect(),b=$('#bm');
+const x1=g.left+g.width/2-A.left,y1=g.bottom-12-A.top,x2=P.left+P.width/2-A.left,y2=P.top+P.height/2-A.top,len=Math.hypot(x2-x1,y2-y1),ang=Math.atan2(x2-x1,y1-y2)*180/Math.PI;
+b.style.cssText=`left:${x1-2}px;top:${y1-len}px;height:${len}px;transform:rotate(${ang}deg)`;b.className='beam';void b.offsetWidth;b.className='beam on'+(good?'':' bad');$('.barrel').style.transform=`rotate(${ang}deg)`;setTimeout(()=>{b.className='beam';$('.barrel').style.transform=''},280)}
+function fire(){if(G.busy)return false;const inp=$('#ty'),v=inp.value,c=G.w.find(w=>w.c);
+if(ok(v,G.t)){G.busy=true;laser(1);words()[G.w.indexOf(c)].classList.add('hit');G.score++;setTimeout(()=>$('#sp').classList.add('boom'),220);setTimeout(()=>{G.i++;G.i>=G.q.length?done('Mission complete',G.score,G.q.length,[],true):ship()},900);return false}
 const d=G.w.find(w=>!w.c&&!w.dead&&ok(v,w.x));
-if(d){d.dead=true;G.dc++;let m='Decoy hit. Try again.';if(G.dc>=2){G.lives--;m=G.dc==2?'Two decoys: you lost a life.':'Three decoys: you lost another life. You still need the right word.'}
-if(G.lives<=0){V.innerHTML='';return done('Game over — answer was “'+esc(G.t.term)+'”',G.score,G.q.length,[G.t]),false}sr(m)}
-else{$('#ty').classList.add('shake');$('#ms').textContent='No target by that name.';$('#ty').select()}return false}
+if(d){laser(0);d.dead=true;G.dc++;words()[G.w.indexOf(d)].classList.add('dead');const sp=$('#sp');sp.classList.remove('hurt');void sp.offsetWidth;sp.classList.add('hurt');let m='Decoy hit. Try again.';
+if(G.dc>=2){G.lives--;m=G.dc==2?'Two decoys: you lost a life.':'Three decoys: you lost another life. You still need the right word.';$('#lv').textContent=hearts()}
+if(G.lives<=0){G.busy=true;setTimeout(()=>done('Game over — answer was “'+esc(G.t.term)+'”',G.score,G.q.length,[G.t]),700);return false}
+$('#ms').textContent=m;inp.value='';inp.focus()}
+else{inp.classList.remove('shake');void inp.offsetWidth;inp.classList.add('shake');$('#ms').textContent='No target by that name.';inp.select()}return false}
 
 /* Level 3 */
-function mcq(){Q={l:sh(S.pool).slice(0,20).map(t=>({t,rev:Math.random()<.5,o:sh([t,...decoys(t,3)])})),i:0,r:0,m:[]};mr()}
+function mcq(){Q={l:sh(S.pool).slice(0,L[3]).map(t=>({t,rev:Math.random()<.5,o:sh([t,...decoys(t,3)])})),i:0,r:0,m:[]};mr()}
 function mr(){const q=Q.l[Q.i];Q.a=false;V.innerHTML=`<div class="hud"><span>Question ${Q.i+1} / ${Q.l.length}</span><span>Correct ${Q.r}</span></div><div class="q"><p class="mute">${q.rev?'Which definition matches this term?':'Which term matches this definition?'}</p><h2>${q.rev?esc(q.t.term):mask(q.t)}</h2>${q.o.map((o,k)=>`<button class="opt" id="o${k}" onclick="pk(${k})">${q.rev?esc(o.definition):esc(o.term)}</button>`).join('')}<div class="row" id="nx"></div></div>`}
 function pk(k){if(Q.a)return;Q.a=true;const q=Q.l[Q.i],g=q.o.indexOf(q.t);q.o.forEach((_,j)=>{$('#o'+j).disabled=true});$('#o'+g).classList.add('good');if(k==g)Q.r++;else{$('#o'+k).classList.add('no');Q.m.push(q.t)}
 $('#nx').innerHTML=`<button class="pri" onclick="Q.i++;Q.i<Q.l.length?mr():done('Multiple choice complete',Q.r,Q.l.length,Q.m,true)">${Q.i<Q.l.length-1?'Next':'Finish'}</button>`;$('#nx button').focus()}
 
 /* Level 4 */
-function free(){Q={l:sh(S.pool).slice(0,20),i:0,r:0,m:[]};fq()}
+function free(){Q={l:sh(S.pool).slice(0,L[4]),i:0,r:0,m:[]};fq()}
 function fq(){const t=Q.l[Q.i];V.innerHTML=`<div class="hud"><span>Question ${Q.i+1} / ${Q.l.length}</span><span>Correct ${Q.r}</span></div><div class="q"><p class="mute">Type the term that matches this definition:</p><h2 style="font-size:1.1rem">${mask(t)}</h2><form onsubmit="return fc()"><input type="text" id="ty" autocomplete="off" aria-label="Your answer"><div class="row"><button class="pri" id="sb">Check</button></div></form><div id="fb"></div></div>`;$('#ty').focus()}
 function fc(){const t=Q.l[Q.i];if(Q.done){fnx();return false}const good=ok($('#ty').value,t);Q.done=true;Q.cur=good;if(good)Q.r++;else Q.m.push(t);
 $('#ty').disabled=true;$('#sb').textContent=Q.i<Q.l.length-1?'Next':'Finish';$('#fb').innerHTML=good?'<p style="color:var(--ok)"><b>Correct.</b></p>':`<p style="color:var(--bad)"><b>Not quite.</b> Answer: <b>${esc(t.term)}</b></p><button type="button" onclick="ov()">My answer was right, count it</button>`;$('#sb').focus();return false}
