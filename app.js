@@ -18,7 +18,7 @@ const mask=t=>{let s=t.definition;const v=new Set([t.term,t.term.replace(/\s*\(.
 const decoys=(t,n)=>{const src=S.pool.length>=6?S.pool:S.all,f=forms(t),o=src.filter(x=>x!==t&&!forms(x).some(y=>f.includes(y)));return[...sh(o.filter(x=>x.category==t.category)),...sh(o.filter(x=>x.category!=t.category))].slice(0,n)};
 
 function nav(){$('#nav').innerHTML=['Setup','1 Flashcards','2 Shooter','3 Multiple choice','4 Free response'].map((n,i)=>`<button class="${i==lv?'on':''}" ${S||i==0?'':'disabled'} onclick="go(${i})">${n}</button>`).join('')}
-function go(l){G.run=false;cancelAnimationFrame(G.raf);lv=l;nav();l>=2?intro(l):[setup,flash][l]()}
+function go(l){document.body.classList.toggle('wide',l==2);G.run=false;cancelAnimationFrame(G.raf);lv=l;nav();l>=2?intro(l):[setup,flash][l]()}
 const NM={2:'Level 2: Shooter',3:'Level 3: Multiple choice',4:'Level 4: Free response'};
 function intro(l){const n=S.pool.length;L[l]=Math.max(1,Math.min(L[l],n));const o=[5,10,15,20,30,50].filter(x=>x<n).concat(n);
 V.innerHTML=`<div class="q"><h2>${NM[l]}</h2><p class="mute">How many ${l==2?'ships':'questions'} do you want? (${n} terms available)</p><div class="chips">${o.map(x=>`<button class="chip ${L[l]==x?'on':''}" onclick="sl(${l},${x})">${x==n?'All ('+n+')':x}</button>`).join('')}</div><div class="row"><label>Custom: <input type="number" id="ln" min="1" max="${n}" value="${L[l]}" onchange="sl(${l},this.value)" style="width:5em"></label></div><div class="row"><button class="pri" onclick="[0,0,shoot,mcq,free][${l}]()">Start (${L[l]})</button></div></div>`}
@@ -48,30 +48,32 @@ document.addEventListener('keydown',e=>{if(lv!=1||e.target.tagName=='INPUT')retu
 function done(title,right,total,miss,next){const pct=Math.round(100*right/total);V.innerHTML=`<div class="q"><h2>${title}</h2><p><b>${right} / ${total}</b> (${pct}%)</p>${miss.length?'<p>Review these:</p>'+miss.map(m=>`<p><b>${esc(m.term)}</b><br><span class="mute">${esc(m.definition)}</span></p>`).join(''):'<p>Perfect run.</p>'}<div class="row"><button class="pri" onclick="go(lv)">Play again</button>${next?`<button onclick="go(${lv+1})">Next level</button>`:''}</div></div>`}
 
 /* Level 2: mothership launches drones that flock (boids) toward the player. Time is the pressure. */
-function shoot(){G={q:sh(S.pool).slice(0,L[2]),i:0,score:0,miss:[]};ship()}
-function ship(){const t=G.q[G.i];Object.assign(G,{t,busy:false,run:true,m:1+.1*G.i,tm:0,d:[],pend:sh([{t,c:1},...decoys(t,4).map(x=>({t:x}))])});sr();const A=$('.arena');G.W=A.clientWidth;G.H=A.clientHeight;G.last=performance.now();G.raf=requestAnimationFrame(tick)}
-function sr(){V.innerHTML=`<div class="hud"><span>Round ${G.i+1} / ${G.q.length} · Score ${G.score}</span><span>Speed ×${G.m.toFixed(1)}</span></div><div class="bar"><i style="width:${100*G.i/G.q.length}%"></i></div><div class="q"><b>Type the term on the right drone:</b><p>${mask(G.t)}</p></div>
+function shoot(){G={q:sh(S.pool).slice(0,L[2]),i:0,score:0,lives:3,miss:[]};ship()}
+const hearts=()=>'♥'.repeat(G.lives)+'♡'.repeat(3-G.lives);
+function ship(){const t=G.q[G.i];Object.assign(G,{t,busy:false,run:true,m:1+.1*G.i,d:[],pend:sh([{t,c:1},...decoys(t,4).map(x=>({t:x}))])});sr();const A=$('.arena');G.W=A.clientWidth;G.H=A.clientHeight;G.v=(G.H-110)/20;G.pend.forEach(spawn);G.pend=[];G.last=performance.now();G.raf=requestAnimationFrame(tick)}
+function sr(){V.innerHTML=`<div class="hud"><span>Round ${G.i+1} / ${G.q.length} · Score ${G.score}</span><span>Speed ×${G.m.toFixed(1)} · <span class="lives" id="lv" aria-label="lives">${hearts()}</span></span></div><div class="bar"><i style="width:${100*G.i/G.q.length}%"></i></div><div class="q"><b>Type the term on the right drone:</b><p>${mask(G.t)}</p></div>
 <div class="arena"><div class="stars s1"></div><div class="stars s2"></div><div class="planet"></div><div class="beam" id="bm"></div><div class="mother"><div class="dome"></div><div class="hull"></div><div class="lights"><i></i><i></i><i></i><i></i><i></i></div></div><div class="gun"><i class="barrel"></i><i class="base"></i></div></div>
-<form onsubmit="return fire()" class="row" style="margin-bottom:0"><input type="text" id="ty" autocomplete="off" placeholder="Type a term and press Enter" aria-label="Your answer"><button class="pri">Fire</button></form><p id="ms" class="mute">Wrong drones shrug off your shots. Hit the right one to wipe out the whole wave, and don't let any drone reach you. Every round is faster.</p>`;$('#ty').focus()}
-function spawn(){const d=G.pend.shift(),e=document.createElement('div');e.className='drone';e.textContent=d.t.term;$('.arena').appendChild(e);Object.assign(d,{el:e,w:e.offsetWidth,h:e.offsetHeight,px:G.W/2+(Math.random()-.5)*60,py:70,vx:(Math.random()-.5)*30,vy:25});G.d.push(d)}
+<form onsubmit="return fire()" class="row" style="margin-bottom:0"><input type="text" id="ty" autocomplete="off" placeholder="Type a term and press Enter" aria-label="Your answer"><button class="pri">Fire</button></form><p id="ms" class="mute">The whole wave launches at once. Wrong drones shrug off your shots, so find the right one and shoot it to wipe out the wave. Every drone that reaches you costs a life (3 lives), and every round is faster.</p>`;$('#ty').focus()}
+function spawn(d,k){const e=document.createElement('div');e.className='drone';e.textContent=d.t.term;$('.arena').appendChild(e);Object.assign(d,{el:e,w:e.offsetWidth,h:e.offsetHeight,px:G.W/2+(k-2)*55,py:80,vx:(k-2)*G.v*.6,vy:G.v*.5});G.d.push(d)}
 /* boids: separation + alignment + cohesion + seek(player), then a hard no-overlap pass */
-function steer(dt){const D=G.d,sp=30*G.m,gx=G.W/2,gy=G.H-30;
+function steer(dt){const D=G.d,sp=G.v*G.m,gx=G.W/2,gy=G.H-30;
 D.forEach(a=>{let sx=0,sy=0,vx=0,vy=0,cx=0,cy=0,n=0;
 D.forEach(b=>{if(a==b)return;const dx=a.px-b.px,dy=a.py-b.py,rx=(a.w+b.w)/2+14,ry=(a.h+b.h)/2+14,nd=Math.hypot(dx/rx,dy/ry)||.01;
 if(nd<1.7){const f=(1.7-nd)/nd;sx+=dx/rx*f;sy+=dy/ry*f}
 if(Math.hypot(dx,dy)<180){vx+=b.vx;vy+=b.vy;cx+=b.px;cy+=b.py;n++}});
 const tx=gx-a.px,ty=gy-a.py,l=Math.hypot(tx,ty)||1;let ax=(tx/l*sp-a.vx)*1.2+sx*120,ay=(ty/l*sp-a.vy)*1.2+sy*120;
 if(n){ax+=(vx/n-a.vx)*.5+(cx/n-a.px)*.05;ay+=(vy/n-a.vy)*.5+(cy/n-a.py)*.05}a.ax=ax;a.ay=ay});
-D.forEach(a=>{a.vx+=a.ax*dt;a.vy+=a.ay*dt;const s=Math.hypot(a.vx,a.vy);if(s>sp*1.3){a.vx*=sp*1.3/s;a.vy*=sp*1.3/s}a.px+=a.vx*dt;a.py+=a.vy*dt});
+D.forEach(a=>{a.vx+=a.ax*dt;a.vy+=a.ay*dt;const s=Math.hypot(a.vx,a.vy);if(s>sp*1.15){a.vx*=sp*1.15/s;a.vy*=sp*1.15/s}a.px+=a.vx*dt;a.py+=a.vy*dt});
 for(let k=0;k<3;k++){for(let i=0;i<D.length;i++)for(let j=i+1;j<D.length;j++){const a=D[i],b=D[j],dx=a.px-b.px,dy=a.py-b.py,ox=(a.w+b.w)/2+8-Math.abs(dx),oy=(a.h+b.h)/2+8-Math.abs(dy);
 if(ox>0&&oy>0){if(ox<oy){const s=(dx<0?-1:1)*ox/2;a.px+=s;b.px-=s}else{const s=(dy<0?-1:1)*oy/2;a.py+=s;b.py-=s}}}
 D.forEach(a=>{a.px=Math.max(a.w/2,Math.min(G.W-a.w/2,a.px));a.py=Math.max(a.h/2+60,a.py)})}}
-function tick(now){if(!G.run)return;const dt=Math.min(.05,(now-G.last)/1000);G.last=now;G.tm+=dt;
-if(G.pend.length&&G.tm>=0){spawn();G.tm=-1.2/G.m}
-steer(dt);const gx=G.W/2,gy=G.H-30;let hit=0;
-G.d.forEach(d=>{d.el.style.translate=`${d.px-d.w/2}px ${d.py-d.h/2}px`;if(Math.hypot(d.px-gx,d.py-gy)<d.w/2+22)hit=1});
-if(hit)return breach();G.raf=requestAnimationFrame(tick)}
-function breach(){G.run=false;G.busy=true;G.miss.push(G.t);$('.arena').classList.add('breach');$('#ms').innerHTML='A drone reached you! The answer was <b>'+esc(G.t.term)+'</b>.';setTimeout(nr,1600)}
+function tick(now){if(!G.run)return;const dt=Math.min(.05,(now-G.last)/1000);G.last=now;steer(dt);const gx=G.W/2,gy=G.H-30;
+G.d.forEach(d=>d.el.style.translate=`${d.px-d.w/2}px ${d.py-d.h/2}px`);
+for(const d of G.d.slice())if(Math.hypot(d.px-gx,d.py-gy)<d.w/2+22&&hit(d))return;G.raf=requestAnimationFrame(tick)}
+/* a drone reaching the player costs a life; if it carried the answer the round is lost; 0 lives = game over */
+function hit(d){G.d=G.d.filter(x=>x!=d);d.el.classList.add('boom');setTimeout(()=>d.el.remove(),600);G.lives--;$('#lv').textContent=hearts();const A=$('.arena');A.classList.remove('breach');void A.offsetWidth;A.classList.add('breach');if(d.c)G.miss.push(G.t);
+if(G.lives<=0){G.run=false;G.busy=true;if(!d.c)G.miss.push(G.t);setTimeout(()=>done('Game over — answer was “'+esc(G.t.term)+'”',G.score,G.q.length,G.miss,false),1200);return 1}
+if(d.c){G.run=false;G.busy=true;$('#ms').innerHTML='The drone with the answer reached you! It was <b>'+esc(G.t.term)+'</b>.';setTimeout(nr,1600);return 1}return 0}
 function nr(){G.i++;G.i>=G.q.length?done('Mission complete',G.score,G.q.length,G.miss,true):ship()}
 function laser(good,d){const A=$('.arena').getBoundingClientRect(),g=$('.gun').getBoundingClientRect(),b=$('#bm');
 const x1=g.left+g.width/2-A.left,y1=g.bottom-12-A.top,len=Math.hypot(d.px-x1,d.py-y1),ang=Math.atan2(d.px-x1,y1-d.py)*180/Math.PI;

@@ -31,7 +31,7 @@ input[type=text],input[type=number]{font:inherit;width:100%;padding:10px;border-
 
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.chip.on{background:var(--hot);color:#0d1b2a;border-color:var(--hot);font-weight:700}
 .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--hot);transition:width .3s}
-.arena{position:relative;height:340px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(#050b14,#141039 70%,#2a1450)}
+.arena{position:relative;height:clamp(400px,62vh,640px);border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(#050b14,#141039 70%,#2a1450)}
 .stars{position:absolute;inset:0;animation:drift 18s linear infinite}
 .s1{background:radial-gradient(circle,#fff9 1px,transparent 1.5px) 0 0/60px 50px}
 .s2{background:radial-gradient(circle,#fffc 1.5px,transparent 2px) 20px 0/110px 90px;animation:drift2 9s linear infinite}
@@ -51,7 +51,7 @@ input[type=text],input[type=number]{font:inherit;width:100%;padding:10px;border-
 .barrel{position:absolute;bottom:12px;left:50%;width:10px;height:34px;margin-left:-5px;border-radius:5px 5px 2px 2px;background:linear-gradient(90deg,#5b7a99,#cfe0f0,#5b7a99);transform-origin:50% 100%;transition:transform .12s;z-index:1}
 @media(prefers-reduced-motion:reduce){.ship,.stars,.lights i{animation:none}.in{transition:none}}
 
-.mother{position:absolute;top:6px;left:calc(50% - 110px);width:220px}
+.mother{position:absolute;top:6px;left:calc(50% - 140px);width:280px}
 .mother::after{content:"";position:absolute;top:100%;left:20%;width:60%;height:70px;background:linear-gradient(#ffb70333,transparent);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
 .mother .hull{min-height:22px;padding:8px}
 .drone{position:absolute;left:0;top:0;z-index:1;padding:4px 12px;border-radius:10px;background:linear-gradient(#26405c,#10223a);border:1px solid #5fd7ff;box-shadow:0 0 10px #5fd7ff66;font-size:.9rem;white-space:nowrap;color:#e6edf5;will-change:translate}
@@ -63,3 +63,4 @@ input[type=text],input[type=number]{font:inherit;width:100%;padding:10px;border-
 .arena.breach{animation:sh .4s;box-shadow:0 0 24px var(--bad)}
 .bk{padding:3px 10px;border:1px dashed var(--mute);border-radius:8px}
 select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px;margin:2px 0 10px;max-width:100%}
+.wide main{max-width:1100px}
