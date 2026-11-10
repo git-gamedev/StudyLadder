@@ -72,3 +72,5 @@ select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid va
 .rq.good .rh{color:var(--ok)}.rq.bad .rh{color:var(--bad)}.rh{font-size:.9rem}.rp{margin:4px 0}
 .rl{padding:6px 10px;margin:6px 0;border-radius:8px;border-left:4px solid}.pl{color:var(--mute);margin-bottom:4px}
 .rl.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--panel))}.rl.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--panel))}
+
+.mtb{display:grid;grid-template-columns:1fr 2fr;gap:10px}.mtb>div{display:flex;flex-direction:column;gap:8px}

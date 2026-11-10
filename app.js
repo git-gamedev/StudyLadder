@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s),V=$('#v');let S=null,lv=0,Q={},F={},G={},L={2:12,3:20,4:20,5:20,6:20},MX=null,R=[];
 const NQ=l=>MX&&MX.n?MX.n:L[l];
-const DEF={delay:5,spd:10,travel:20,lives:3,drones:5,mcMulti:30,mcOpts:4,mcGroup:3,mcExtra:2,frMulti:40,frBlanks:4,frLen:6,tfTrue:50,wt:30,wm:30,wf:30};
+const DEF={delay:5,spd:10,travel:20,lives:3,drones:5,mcMulti:30,mcOpts:4,mcGroup:3,mcExtra:2,frMulti:40,frBlanks:4,frLen:6,tfTrue:50,wt:30,wm:30,wf:30,wa:20,wd:20,we:10,perf:0,spTime:60,mtPairs:6,doOpts:4,exThr:60};
 const ST={...DEF};try{const o=JSON.parse(localStorage.getItem('studyladder.settings.v1'))||{};Object.keys(DEF).forEach(k=>{if(typeof o[k]=='number')ST[k]=o[k]})}catch(e){}
 const saveST=()=>{try{localStorage.setItem('studyladder.settings.v1',JSON.stringify(ST))}catch(e){}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
@@ -24,32 +24,34 @@ const decoys=(t,n)=>{const src=S.pool.length>=6?S.pool:S.all,f=forms(t),o=src.fi
 let LIB=[];const KEY='studyladder.library.v1';
 function loadLib(){try{LIB=JSON.parse(localStorage.getItem(KEY));if(!Array.isArray(LIB))LIB=[]}catch(e){LIB=[]}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(LIB));return 1}catch(e){return 0}}
-function nav(){$('#sub').textContent=S?S.title:'Upload a study JSON to build your four practice levels.';$('#nav').innerHTML=['Setup','1 Flashcards','2 Shooter','3 True / False','4 Multiple choice','5 Free response','6 Mixed'].map((n,i)=>`<button class="${i==lv?'on':''}" ${S||i==0?'':'disabled'} onclick="go(${i})">${n}</button>`).join('')}
-function go(l){document.body.classList.toggle('wide',l==2);MX=null;G.end=1;G.run=false;cancelAnimationFrame(G.raf);lv=l;nav();l>=2?intro(l):[setup,flash][l]()}
-const NM={2:'Level 2: Shooter',3:'Level 3: True / False',4:'Level 4: Multiple choice',5:'Level 5: Free response',6:'Level 6: Mixed test'};
-const NAMES={2:'Shooter',3:'True / False',4:'Multiple choice',5:'Free response'},WK={3:'wt',4:'wm',5:'wf'};
+function nav(){$('#sub').textContent=S?S.title:'Upload a study JSON to build your four practice levels.';$('#nav').innerHTML=[0,1,2,7,3,4,5,8,9,10,6].map(i=>{const n=['Setup','Flashcards','Shooter (game)','True / False','Multiple choice','Free response','Mixed','Speed round (game)','Matching board','Definition ordering','Explain it back'][i];return `<button class="${i==lv?'on':''}" ${S||i==0?'':'disabled'} onclick="go(${i})">${n}</button>`}).join('')}
+function go(l){document.body.classList.toggle('wide',l==2);MX=null;PF=PS=null;G.end=1;G.run=false;cancelAnimationFrame(G.raf);lv=l;nav();l>=2?intro(l):[setup,flash][l]()}
+const NM={2:'Level 2: Shooter',3:'Level 3: True / False',4:'Level 4: Multiple choice',5:'Level 5: Free response',6:'Level 6: Mixed test',7:'Speed round (game)',8:'Matching board',9:'Definition ordering',10:'Explain it back'};
+const NAMES={2:'Shooter',3:'True / False',4:'Multiple choice',5:'Free response',7:'Speed round',8:'Matching',9:'Definition ordering',10:'Explain it back'},WK={3:'wt',4:'wm',5:'wf',8:'wa',9:'wd',10:'we'},NX={1:2,2:7,7:3,3:4,4:5,5:8,8:9,9:10,10:6},FN={2:shoot,3:tf,4:mcq,5:free,7:speed,8:match,9:dord,10:expl};let PF=null,PS=null;const P=()=>PF||S.pool;
 const SET={2:[['delay','Seconds to read the question before launch',0,30,1],['spd','Speed increase per round (%)',0,50,1],['travel','Seconds for round-1 drones to reach you',8,60,1],['lives','Lives',1,10,1],['drones','Drones per wave',3,8,1]],
 4:[['mcMulti','Multi-part question rate (%)',0,100,5],['mcOpts','Answer options per normal question',2,6,1],['mcGroup','Terms per multi-part question',2,5,1],['mcExtra','Extra bank terms in multi-part questions',0,4,1]],
 5:[['frMulti','Key-word (fill-in) question rate (%)',0,100,5],['frBlanks','Max blanks per key-word question',2,6,1],['frLen','Min letters for a key word (numbers and acronyms always count)',4,10,1]],
 3:[['tfTrue','Share of statements that are true (%)',0,100,5]],
 };
-SET[6]=['Mix weights',['wt','True / False weight',0,100,5],['wm','Multiple choice weight',0,100,5],['wf','Free response weight',0,100,5],'True / False settings',...SET[3],'Multiple choice settings',...SET[4],'Free response settings',...SET[5]];
-function mixCounts(){const n=L[6],k=[3,4,5],w=k.map(x=>ST[WK[x]]),s=w.reduce((a,b)=>a+b,0);if(!s)return[];const raw=w.map(x=>x/s*n),c=raw.map(Math.floor);let r=n-c.reduce((a,b)=>a+b,0);
+SET[7]=[['spTime','Seconds on the clock',15,300,5]];SET[8]=[['mtPairs','Pairs per board',3,10,1]];SET[9]=[['doOpts','Definitions to choose from',2,6,1]];SET[10]=[['exThr','Key words needed to pass (%)',30,100,5]];
+SET[6]=['Mix weights',['wt','True / False weight',0,100,5],['wm','Multiple choice weight',0,100,5],['wf','Free response weight',0,100,5],['wa','Matching board weight',0,100,5],['wd','Definition ordering weight',0,100,5],['we','Explain it back weight',0,100,5],'True / False settings',...SET[3],'Multiple choice settings',...SET[4],'Free response settings',...SET[5],'Matching settings',...SET[8],'Definition ordering settings',...SET[9],'Explain it back settings',...SET[10]];
+const PERF=['perf','Perfectionist mode (1 = on): missed terms come back until you get every one right',0,1,1];[2,3,4,5,7,8,9,10].forEach(k=>SET[k].push(PERF));SET[6].push('Perfectionist (applies to every test and game)',PERF);
+function mixCounts(){const n=L[6],k=[3,4,5,8,9,10],w=k.map(x=>ST[WK[x]]),s=w.reduce((a,b)=>a+b,0);if(!s)return[];const raw=w.map(x=>x/s*n),c=raw.map(Math.floor);let r=n-c.reduce((a,b)=>a+b,0);
 raw.map((x,i)=>[x-c[i],i]).sort((a,b)=>b[0]-a[0]).forEach(([_,i])=>{if(r>0){c[i]++;r--}});return k.map((x,i)=>[x,c[i]]).filter(b=>b[1]>0)}
 function intro(l){const n=S.pool.length;L[l]=Math.max(1,Math.min(L[l],n));const o=[5,10,15,20,30,50].filter(x=>x<n).concat(n),mc=l==6?mixCounts():0;
 V.innerHTML=`<div class="q"><h2>${NM[l]}</h2><p class="mute">How many ${l==2?'rounds':'questions'}${l==6?' in total':''}? (${n} terms available)</p><div class="chips">${o.map(x=>`<button class="chip ${L[l]==x?'on':''}" onclick="sl(${l},${x})">${x==n?'All ('+n+')':x}</button>`).join('')}</div><div class="row"><label>Custom: <input type="number" id="ln" min="1" max="${n}" value="${L[l]}" onchange="sl(${l},this.value)" style="width:5em"></label></div></div>
 <div class="q"><h2>Settings</h2>${l==6?'<p class="mute">Concentration: each format\'s share is its weight divided by the total. Formats run as parts in this order: True / False, Multiple choice, Free response (no Shooter). Every setting for those formats is below, and they are shared with the matching level screens.</p>':''}${SET[l].map(s=>typeof s=='string'?`<h3>${s}</h3>`:(([k,lab,mn,mx,st])=>`<label class="srow"><span>${lab}</span><input type="number" id="st_${k}" min="${mn}" max="${mx}" step="${st}" value="${ST[k]}" onchange="ss('${k}',this.value,${mn},${mx})" style="width:5.5em"></label>`)(s)).join('')}${l==6?`<p><b>This test:</b> ${mc.length?mc.map(([k,c])=>NAMES[k]+' '+c).join(', '):'<span class="err">set at least one weight above 0</span>'}</p>`:''}<div class="row"><button onclick="rs(${l})">Reset to defaults</button></div></div>
-<div class="row"><button class="pri" ${l==6&&!mc.length?'disabled':''} onclick="[0,0,shoot,tf,mcq,free,mixed][${l}]()">Start (${L[l]})</button></div>`}
-function ss(k,v,mn,mx){let x=parseFloat(v);if(isNaN(x))x=DEF[k];ST[k]=Math.max(mn,Math.min(mx,x));saveST();if(lv==6&&/^w[tmf]$/.test(k))intro(6);else $('#st_'+k).value=ST[k]}
+<div class="row"><button class="pri" ${l==6&&!mc.length?'disabled':''} onclick="[0,0,shoot,tf,mcq,free,mixed,speed,match,dord,expl][${l}]()">Start (${L[l]})</button></div>`}
+function ss(k,v,mn,mx){let x=parseFloat(v);if(isNaN(x))x=DEF[k];ST[k]=Math.max(mn,Math.min(mx,x));saveST();if(lv==6&&/^w[tmfade]$/.test(k))intro(6);else $('#st_'+k).value=ST[k]}
 function rs(l){SET[l].forEach(s=>{if(typeof s!='string')ST[s[0]]=DEF[s[0]]});saveST();intro(l)}
 /* Mixed test: a sequence of parts (one per format), each run by the normal level code; done() hands results back here. */
 function mixed(){const b=mixCounts();if(!b.length)return;R=[];MX={b,i:-1,r:0,tot:0,m:[],res:[],n:0};mxGo()}
 function mxGo(){MX.i++;if(MX.i>=MX.b.length)return mxEnd();const[k,n]=MX.b[MX.i];MX.n=n;V.innerHTML=`<div class="q"><h2>Part ${MX.i+1} of ${MX.b.length}: ${NAMES[k]}</h2><p>${n} ${k==2?'rounds':'questions'}</p><div class="row"><button class="pri" onclick="mxRun()">Start</button></div></div>`;$('.pri').focus()}
-function mxRun(){[0,0,shoot,tf,mcq,free][MX.b[MX.i][0]]()}
+function mxRun(){FN[MX.b[MX.i][0]]()}
 function mxNext(r,t,m){MX.r+=r;MX.tot+=t;MX.m.push(...m);MX.res.push([MX.b[MX.i][0],r,t]);mxGo()}
 function mxEnd(){const x=MX;MX=null;done('Mixed test complete',x.r,x.tot,[...new Set(x.m)],false)}
 /* True / False: a term with either its own definition or another term's definition. */
-function tf(){if(!MX)R=[];const l=sh(S.pool).slice(0,NQ(3)).map(t=>{const d=decoys(t,1)[0],tr=!d||Math.random()<ST.tfTrue/100;return{t,d:tr?t:d,tr}});Q={l,tot:l.length,i:0,r:0,m:[]};tq()}
+function tf(){if(!MX&&!PF)R=[];const l=sh(P()).slice(0,NQ(3)).map(t=>{const d=decoys(t,1)[0],tr=!d||Math.random()<ST.tfTrue/100;return{t,d:tr?t:d,tr}});Q={l,tot:l.length,i:0,r:0,m:[]};tq()}
 function tq(){const q=Q.l[Q.i];Q.a=false;V.innerHTML=`<div class="hud"><span>Question ${Q.i+1} / ${Q.l.length}</span><span>Correct ${Q.r}</span>${END}</div><div class="q"><p class="mute">True or false: does this definition belong to this term?</p><h2>${esc(q.t.term)}</h2><p>${mask(q.d)}</p><div class="row"><button id="tT" onclick="tk(1)" style="min-width:8em;padding:12px 24px">True</button><button id="tF" onclick="tk(0)" style="min-width:8em;padding:12px 24px">False</button></div><div id="fb"></div><div class="row" id="nx"></div></div>`}
 function tk(v){if(Q.a)return;Q.a=true;const q=Q.l[Q.i],good=!!v==q.tr;$('#tT').disabled=$('#tF').disabled=true;R.push({f:'True / False',q:'<b>'+esc(q.t.term)+'</b>: '+mask(q.d),parts:[{g:v?'True':'False',e:q.tr?'True':'False (that definition belongs to '+q.d.term+')',ok:good}],pts:good?1:0,max:1});$(q.tr?'#tT':'#tF').style.borderColor='var(--ok)';
 if(good)Q.r++;else{$(v?'#tT':'#tF').style.borderColor='var(--bad)';Q.m.push(q.t)}
@@ -90,16 +92,17 @@ document.addEventListener('keydown',e=>{if(lv!=1||e.target.tagName=='INPUT')retu
 /* shared results */
 const END='<button class="endb" type="button" onclick="endEarly()">End test</button>';
 function endEarly(){if(!confirm('End the test now? The questions you have answered so far will be scored.'))return;G.end=1;G.run=false;cancelAnimationFrame(G.raf);MX=null;done('',0,0,[],false,true)}
-function retake(){document.body.classList.toggle('wide',lv==2);[0,0,shoot,tf,mcq,free,mixed][lv]()}
+function retake(){document.body.classList.toggle('wide',lv==2);[0,0,shoot,tf,mcq,free,mixed,speed,match,dord,expl][lv]()}
 const blanked=(t,x)=>{let s='',p=0;x.keys.forEach(w=>{s+=esc(t.definition.slice(p,w.i))+'_____';p=w.i+w.w.length});return s+esc(t.definition.slice(p))};
 function report(){return R.length?`<div class="q"><h2>Test report</h2><p class="mute">Every question you answered, your answer, and the answer being looked for. Green = correct, red = wrong.</p>${R.map((e,n)=>`<div class="rq ${e.pts==e.max?'good':'bad'}"><div class="rh"><b>${n+1}.</b> ${e.f} · ${e.pts}/${e.max}</div><div class="rp">${e.q}</div>${e.parts.map(p=>`<div class="rl ${p.ok?'good':'bad'}">${p.l?`<div class="pl">${p.l}</div>`:''}Your answer: <b>${esc(p.g===''||p.g==null?'(blank)':p.g)}</b><br>Answer sought: <b>${esc(p.e)}</b></div>`).join('')}</div>`).join('')}</div>`:'<div class="q"><p>No questions were answered.</p></div>'}
-function done(title,right,total,miss,next,early){if(MX)return mxNext(right,total,miss);
+function perf(right,total,miss){if(!ST.perf||!miss.length)return 0;PS=PS||[right,total];PF=[...new Set(miss)];V.innerHTML=`<div class="q"><h2>Perfectionist mode</h2><p>You missed ${PF.length} term${PF.length==1?'':'s'}. They come back until you get every one right. Your score stays your first-pass score.</p><div class="row"><button class="pri" onclick="FN[MX?MX.b[MX.i][0]:lv]()">Retry missed</button></div></div>`;return 1}
+function done(title,right,total,miss,next,early){if(!early&&perf(right,total,miss))return;const fp=PS;PF=PS=null;if(fp&&!early){right=fp[0];total=fp[1]}if(MX)return mxNext(right,total,miss);
 if(early){right=R.reduce((a,e)=>a+e.pts,0);total=R.reduce((a,e)=>a+e.max,0)}
 const pct=total?Math.round(100*right/total):0,by={};R.forEach(e=>{const k=e.f.split(' (')[0];by[k]=by[k]||[0,0];by[k][0]+=e.pts;by[k][1]+=e.max});
-V.innerHTML=`<div class="q"><h2>${early?'Test ended early':title}</h2><p><b>${right} / ${total}</b> (${pct}%)${early?` · ${R.length} question${R.length==1?'':'s'} answered`:''}</p>${Object.keys(by).length>1?'<p class="mute">'+Object.entries(by).map(([k,v])=>k+': '+v[0]+'/'+v[1]).join(' · ')+'</p>':''}<div class="row"><button class="pri" onclick="retake()">Retake</button><button onclick="go(lv)">Settings</button>${next?`<button onclick="go(${lv+1})">Next level</button>`:''}</div></div>${report()}`}
+V.innerHTML=`<div class="q"><h2>${early?'Test ended early':title}</h2><p><b>${right} / ${total}</b> (${pct}%)${early?` · ${R.length} question${R.length==1?'':'s'} answered`:''}</p>${Object.keys(by).length>1?'<p class="mute">'+Object.entries(by).map(([k,v])=>k+': '+v[0]+'/'+v[1]).join(' · ')+'</p>':''}<div class="row"><button class="pri" onclick="retake()">Retake</button><button onclick="go(lv)">Settings</button>${next?`<button onclick="go(NX[lv])">Next level</button>`:''}</div></div>${report()}`}
 
 /* Level 2: mothership launches drones that flock (boids) toward the player. Time is the pressure. */
-function shoot(){if(!MX)R=[];G={q:sh(S.pool).slice(0,NQ(2)),i:0,score:0,lives:ST.lives,max:ST.lives,miss:[]};ship()}
+function shoot(){if(!MX&&!PF)R=[];G={q:sh(P()).slice(0,NQ(2)),i:0,score:0,lives:ST.lives,max:ST.lives,miss:[]};ship()}
 const hearts=()=>'♥'.repeat(G.lives)+'♡'.repeat(G.max-G.lives);
 function ship(){const t=G.q[G.i];Object.assign(G,{t,busy:false,run:true,shots:[],m:1+ST.spd/100*G.i,d:[],pend:sh([{t,c:1},...decoys(t,ST.drones-1).map(x=>({t:x}))])});sr();const A=$('.arena');G.W=A.clientWidth;G.H=A.clientHeight;G.v=(G.H-110)/ST.travel;G.n=G.pend.length;G.wait=ST.delay;if(G.wait<=0){G.pend.forEach(spawn);G.pend=[];$('#cdw').remove()}G.last=performance.now();G.raf=requestAnimationFrame(tick)}
 function sr(){V.innerHTML=`<div class="hud"><span>Round ${G.i+1} / ${G.q.length} · Score ${G.score}</span><span>Speed ×${G.m.toFixed(1)} · <span class="lives" id="lv" aria-label="lives">${hearts()}</span></span>${END}</div><div class="bar"><i style="width:${100*G.i/G.q.length}%"></i></div><div class="q"><b>Type the term on the right drone:</b><p>${mask(G.t)}</p></div>
@@ -142,8 +145,8 @@ else{inp.classList.remove('shake');void inp.offsetWidth;inp.classList.add('shake
    matching question with 2 extra bank terms that fit nothing; each bank term is used at most once; 1 point per part.
    About 30% of questions are multi-part when the set has at least 6 terms. */
 const bankx=(g,n)=>{const src=S.pool.length>=6?S.pool:S.all,o=src.filter(x=>!g.includes(x)&&!g.some(y=>forms(y).some(f=>forms(x).includes(f))));return[...sh(o.filter(x=>x.category==g[0].category)),...sh(o.filter(x=>x.category!=g[0].category))].slice(0,n)};
-function mcq(){if(!MX)R=[];const u=new Set(),l=[];let tot=0;
-for(const t of sh(S.pool)){if(l.length>=NQ(4))break;if(u.has(t))continue;u.add(t);
+function mcq(){if(!MX&&!PF)R=[];const u=new Set(),l=[];let tot=0;
+for(const t of sh(P())){if(l.length>=NQ(4))break;if(u.has(t))continue;u.add(t);
 const c=sh(S.pool.filter(x=>x!=t&&x.category==t.category&&!forms(t).some(f=>forms(x).includes(f)))),cand=[...c.filter(x=>!u.has(x)),...c.filter(x=>u.has(x))];
 if(S.pool.length>=6&&cand.length>=ST.mcGroup-1&&Math.random()<ST.mcMulti/100){const g=[t,...cand.slice(0,ST.mcGroup-1)];g.forEach(x=>u.add(x));l.push({g,b:sh([...g,...bankx(g,ST.mcExtra)])});tot+=g.length}
 else{l.push({t,rev:Math.random()<.5,o:sh([t,...decoys(t,ST.mcOpts-1)])});tot++}}
@@ -155,7 +158,7 @@ q.g.forEach((t,k)=>{const g=q.b[v[k]]==t;pr.push({l:mask(t),g:q.b[v[k]].term,e:t
 $('#me').textContent='';$('#nx').innerHTML=`<button class="pri" onclick="Q.i++;Q.i<Q.l.length?mr():done('Multiple choice complete',Q.r,Q.tot,Q.m,true)">${Q.i<Q.l.length-1?'Next':'Finish'}</button>`;$('#nx button').focus()}
 function mr(){const q=Q.l[Q.i];Q.a=false;if(q.g)return mm(q);V.innerHTML=`<div class="hud"><span>Question ${Q.i+1} / ${Q.l.length}</span><span>Correct ${Q.r}</span>${END}</div><div class="q"><p class="mute">${q.rev?'Which definition matches this term?':'Which term matches this definition?'}</p><h2>${q.rev?esc(q.t.term):mask(q.t)}</h2>${q.o.map((o,k)=>`<button class="opt" id="o${k}" onclick="pk(${k})">${q.rev?esc(o.definition):esc(o.term)}</button>`).join('')}<div class="row" id="nx"></div></div>`}
 function pk(k){if(Q.a)return;Q.a=true;const q=Q.l[Q.i],g=q.o.indexOf(q.t);q.o.forEach((_,j)=>{$('#o'+j).disabled=true});$('#o'+g).classList.add('good');if(k==g)Q.r++;else{$('#o'+k).classList.add('no');Q.m.push(q.t)}
-R.push({f:'Multiple choice',q:q.rev?'Which definition matches the term <b>'+esc(q.t.term)+'</b>?':'Which term matches: '+mask(q.t),parts:[{g:q.rev?q.o[k].definition:q.o[k].term,e:q.rev?q.t.definition:q.t.term,ok:k==g}],pts:k==g?1:0,max:1});
+R.push({f:q.f||'Multiple choice',q:q.rev?'Which definition matches the term <b>'+esc(q.t.term)+'</b>?':'Which term matches: '+mask(q.t),parts:[{g:q.rev?q.o[k].definition:q.o[k].term,e:q.rev?q.t.definition:q.t.term,ok:k==g}],pts:k==g?1:0,max:1});
 $('#nx').innerHTML=`<button class="pri" onclick="Q.i++;Q.i<Q.l.length?mr():done('Multiple choice complete',Q.r,Q.tot,Q.m,true)">${Q.i<Q.l.length-1?'Next':'Finish'}</button>`;$('#nx button').focus()}
 
 /* Level 4 */
@@ -170,7 +173,7 @@ if(c.length<2)return null;const sc=x=>x.w.length+(/\d/.test(x.w)?5:0)+(ac(x.w)?3
 const k=Math.max(2,Math.min(ST.frBlanks,Math.round(tk.length/8))),keys=[...c].sort((a,b)=>sc(b)-sc(a)).slice(0,k).sort((a,b)=>a.i-b.i);let h='',p=0;
 keys.forEach((x,n)=>{h+=esc(d.slice(p,x.i))+`<input type="text" id="b${n}" autocomplete="off" aria-label="Blank ${n+1}" style="width:${Math.max(5,x.w.length+2)}ch;display:inline-block;padding:2px 6px">`;p=x.i+x.w.length});return{keys,html:h+esc(d.slice(p))}}
 const kok=(v,w)=>{const a=norm(v),b=norm(w),s=x=>x.replace(/(es|s)$/,'');return !!a&&(same(a,b)||same(s(a),s(b))||(b.length>=7&&sig(a)==sig(b)&&lev(a,b)<=1))};
-function free(){if(!MX)R=[];const l=sh(S.pool).slice(0,NQ(5)),k=new Map();let tot=0;l.forEach(t=>{const x=Math.random()<ST.frMulti/100&&kws(t);if(x){k.set(t,x);tot+=x.keys.length}else tot++});Q={l,k,tot,i:0,r:0,m:[]};fq()}
+function free(){if(!MX&&!PF)R=[];const l=sh(P()).slice(0,NQ(5)),k=new Map();let tot=0;l.forEach(t=>{const x=Math.random()<ST.frMulti/100&&kws(t);if(x){k.set(t,x);tot+=x.keys.length}else tot++});Q={l,k,tot,i:0,r:0,m:[]};fq()}
 function fm(t,x){Q.done=false;V.innerHTML=`<div class="hud"><span>Question ${Q.i+1} / ${Q.l.length} · key words</span><span>Points ${Q.r}</span>${END}</div><div class="q"><p class="mute">Fill in the ${x.keys.length} key words (numbers, acronyms and technical terms) missing from this definition.</p><h2>${esc(t.term)}</h2><form onsubmit="return fk()"><p style="line-height:2.3">${x.html}</p><div class="row"><button class="pri" id="sb">Check</button></div></form><div id="fb"></div></div>`;$('#b0').focus()}
 function fk(){const t=Q.l[Q.i],x=Q.k.get(t);if(Q.done){fnx();return false}Q.done=true;let n=0;const ms=[],pr=[];
 x.keys.forEach((w,k)=>{const i=$('#b'+k),g=kok(i.value,w.w);pr.push({l:'Blank '+(k+1),g:i.value,e:w.w,ok:g});i.disabled=true;i.style.borderColor=g?'var(--ok)':'var(--bad)';g?n++:ms.push(w.w)});Q.r+=n;if(ms.length)Q.m.push(t);R.push({f:'Free response (key words)',q:'<b>'+esc(t.term)+'</b>: '+blanked(t,x),parts:pr,pts:n,max:x.keys.length});
@@ -180,4 +183,38 @@ function fc(){const t=Q.l[Q.i];if(Q.done){fnx();return false}const good=ok($('#t
 $('#ty').disabled=true;$('#sb').textContent=Q.i<Q.l.length-1?'Next':'Finish';$('#fb').innerHTML=good?'<p style="color:var(--ok)"><b>Correct.</b></p>':`<p style="color:var(--bad)"><b>Not quite.</b> Answer: <b>${esc(t.term)}</b></p><button type="button" onclick="ov()">My answer was right, count it</button>`;$('#sb').focus();return false}
 function ov(){const t=Q.l[Q.i];Q.m=Q.m.filter(x=>x!==t);Q.r++;Q.cur=true;Q.e.parts[0].ok=true;Q.e.parts[0].g+=' (counted correct by you)';Q.e.pts=1;$('#fb').innerHTML='<p style="color:var(--ok)"><b>Counted as correct.</b></p>'}
 function fnx(){Q.done=false;Q.i++;Q.i<Q.l.length?fq():done('Free response complete',Q.r,Q.tot,Q.m,true)}
+
+/* Speed round (game): clear as many terms as you can before the clock runs out. */
+function speed(){if(!MX&&!PF)R=[];G={q:sh(P()).slice(0,NQ(7)),i:0,sc:0,t:ST.spTime,miss:[],run:true,end:0};sp()}
+function sp(){const t=G.q[G.i];G.t0=t;V.innerHTML=`<div class="hud"><span>Speed round · <b id="spt">${Math.ceil(G.t)}</b>s</span><span>Cleared ${G.sc} / ${G.q.length}</span>${END}</div><div class="q"><p class="mute">Type the term that matches. Enter to submit, or skip.</p><h2 style="font-size:1.1rem">${mask(t)}</h2><form onsubmit="return spk()" class="row"><input type="text" id="ty" autocomplete="off" aria-label="Your answer"><button class="pri">Go</button><button type="button" onclick="spn(0)">Skip</button></form><p id="ms" class="mute"></p></div>`;$('#ty').focus();if(!G.raf){G.last=performance.now();G.raf=requestAnimationFrame(spt)}}
+function spt(n){if(!G.run)return;G.t-=(n-G.last)/1000;G.last=n;if(G.t<=0)return spe(0);const e=$('#spt');if(e)e.textContent=Math.ceil(G.t);G.raf=requestAnimationFrame(spt)}
+function spk(){const t=G.t0,v=$('#ty').value;if(ok(v,t)){R.push({f:'Speed round',q:mask(t),parts:[{g:v,e:t.term,ok:true}],pts:1,max:1});G.sc++;spn(1);return false}$('#ms').textContent='Not it. Try again or skip.';$('#ty').select();return false}
+function spn(good){if(!good){G.miss.push(G.t0);R.push({f:'Speed round',q:mask(G.t0),parts:[{g:'(skipped)',e:G.t0.term,ok:false}],pts:0,max:1})}G.i++;if(G.i>=G.q.length)return spe(1);sp()}
+function spe(c){G.run=false;cancelAnimationFrame(G.raf);if(!c)G.miss.push(...G.q.slice(G.i));done(c?'Deck cleared':'Time is up',G.sc,G.q.length,G.miss,true)}
+
+/* Matching board: click a term, then its definition. A pair only scores if you got it on the first try. */
+function match(){if(!MX&&!PF)R=[];const p=sh(P()),n=ST.mtPairs,l=[];for(let i=0;i<NQ(8)*n&&i<p.length;i+=n)l.push(p.slice(i,i+n));Q={l,i:0,r:0,m:[],tot:l.reduce((a,b)=>a+b.length,0)};mt()}
+function mt(){const b=Q.l[Q.i];Q.b=b;Q.R=sh(b);Q.s=null;Q.dl=new Set();Q.dr=new Set();Q.x=new Set();V.innerHTML=`<div class="hud"><span>Board ${Q.i+1} / ${Q.l.length}</span><span>Points ${Q.r}</span>${END}</div><div class="q"><p class="mute">Click a term, then the definition that matches it.</p><div class="mtb"><div>${b.map((t,k)=>`<button class="opt" id="mL${k}" onclick="mp(0,${k})">${esc(t.term)}</button>`).join('')}</div><div>${Q.R.map((t,k)=>`<button class="opt" id="mR${k}" onclick="mp(1,${k})">${mask(t)}</button>`).join('')}</div></div><div class="row" id="nx"></div></div>`}
+function mp(s,k){if(s==0){if(Q.dl.has(k))return;Q.s=k;Q.b.forEach((_,j)=>$('#mL'+j).classList.toggle('on',j==k));return}
+if(Q.s==null||Q.dr.has(k))return;const t=Q.b[Q.s],L=$('#mL'+Q.s),Rr=$('#mR'+k);
+if(Q.R[k]!=t){Q.x.add(t);Rr.classList.add('no');setTimeout(()=>Rr.classList.remove('no'),500);return}
+const clean=!Q.x.has(t);Q.dl.add(Q.s);Q.dr.add(k);L.disabled=Rr.disabled=true;L.classList.remove('on');L.classList.add('good');Rr.classList.add('good');if(clean)Q.r++;else Q.m.push(t);
+R.push({f:'Matching',q:'Match the term <b>'+esc(t.term)+'</b> to its definition',parts:[{g:clean?t.term:'(needed more than one try)',e:t.term,ok:clean}],pts:clean?1:0,max:1});Q.s=null;
+if(Q.dl.size==Q.b.length)$('#nx').innerHTML=`<button class="pri" onclick="Q.i++;Q.i<Q.l.length?mt():done('Matching complete',Q.r,Q.tot,Q.m,true)">${Q.i<Q.l.length-1?'Next':'Finish'}</button>`}
+
+/* Definition ordering: choose the right definition among the most similar ones (shared words, same category). Reuses the MC screens. */
+const WC=new WeakMap(),wset=t=>WC.get(t)||(WC.set(t,new Set(toks(t.definition).map(x=>x.w.toLowerCase()).filter(w=>w.length>3&&!STOP.has(w)))),WC.get(t)),
+simi=(a,b)=>{const x=wset(a),y=wset(b);let n=0;x.forEach(w=>y.has(w)&&n++);return n/(x.size+y.size-n||1)+(a.category==b.category?.2:0)};
+function dord(){if(!MX&&!PF)R=[];const l=sh(P()).slice(0,NQ(9)).map(t=>{const c=S.pool.filter(x=>x!=t&&!forms(t).some(f=>forms(x).includes(f))).map(x=>[simi(t,x),x]).sort((a,b)=>b[0]-a[0]).slice(0,ST.doOpts-1).map(a=>a[1]);return{t,rev:true,f:'Definition ordering',o:sh([t,...c])}});Q={l,tot:l.length,i:0,r:0,m:[]};mr()}
+
+/* Explain it back: write the definition from memory; graded by key-word coverage. */
+const kwl=t=>{const hide=new Set([t.term,...(t.aliases||[])].flatMap(x=>norm(x).split(' ')).filter(Boolean)),seen=new Set();return toks(t.definition).filter(x=>{const l=x.w.toLowerCase();if(seen.has(l)||STOP.has(l)||hide.has(norm(x.w))||!(/\d/.test(x.w)||/^[A-Z]{2,}$/.test(x.w)||x.w.length>=5))return false;seen.add(l);return true}).map(x=>x.w)};
+function expl(){if(PF)return ex2();V.innerHTML=`<div class="q" style="border:3px solid var(--bad)"><h2 style="color:var(--bad)">READ THIS BEFORE YOU START</h2><p><b>This test is different. There are no options and no hints.</b></p><ol><li>You get a <b>term</b>. You must <b>write its definition from memory</b>, in your own words.</li><li>You are graded on <b>key words</b>: the numbers, names and technical words the real definition contains. Wording does not matter, <b>content does</b>.</li><li>To pass a question you must hit at least <b>${ST.exThr}%</b> of its key words. Short, vague or one-word answers <b>will fail</b>.</li><li>Writing the term itself earns <b>nothing</b>.</li><li>After each answer you see every key word you hit and missed, plus the real definition. If the grader got it wrong, you can override it.</li></ol><label><input type="checkbox" onchange="$('#xs').disabled=!this.checked"> <b>I understand how this test works.</b></label><div class="row"><button class="pri" id="xs" disabled onclick="ex2()">Start</button></div></div>`}
+function ex2(){if(!MX&&!PF)R=[];const l=sh(P()).map(t=>({t,k:kwl(t)})).filter(x=>x.k.length).slice(0,NQ(10));Q={l,tot:l.length,i:0,r:0,m:[]};xq()}
+function xq(){const q=Q.l[Q.i];Q.a=false;V.innerHTML=`<div class="hud"><span>Question ${Q.i+1} / ${Q.l.length}</span><span>Correct ${Q.r}</span>${END}</div><div class="q"><p class="mute">Write the definition of this term from memory.</p><h2>${esc(q.t.term)}</h2><form onsubmit="return xk()"><textarea id="ty" rows="5" style="width:100%" aria-label="Your explanation"></textarea><div class="row"><button class="pri" id="sb">Check</button></div></form><div id="fb"></div></div>`;$('#ty').focus()}
+function xk(){const q=Q.l[Q.i];if(Q.a){Q.i++;Q.i<Q.l.length?xq():done('Explain it back complete',Q.r,Q.tot,Q.m,true);return false}Q.a=true;
+const v=$('#ty').value,aw=toks(v).map(x=>x.w),h=q.k.filter(w=>aw.some(a=>kok(a,w))),m=q.k.filter(w=>!h.includes(w)),g=h.length/q.k.length*100>=ST.exThr;
+Q.e={f:'Explain it back',q:'Explain <b>'+esc(q.t.term)+'</b> ('+h.length+'/'+q.k.length+' key words)',parts:[{g:v,e:q.t.definition,ok:g}],pts:g?1:0,max:1};R.push(Q.e);if(g)Q.r++;else Q.m.push(q.t);
+$('#ty').disabled=true;$('#fb').innerHTML=`<p style="color:var(--${g?'ok':'bad'})"><b>${g?'Pass':'Not enough'}</b> · ${h.length}/${q.k.length} key words</p><p>Hit: <b>${h.map(esc).join(', ')||'none'}</b><br>Missed: <b>${m.map(esc).join(', ')||'none'}</b></p><p class="mute">Real definition: ${esc(q.t.definition)}</p>${g?'':'<button type="button" onclick="xo()">My answer was right, count it</button>'}`;$('#sb').textContent=Q.i<Q.l.length-1?'Next':'Finish';$('#sb').focus();return false}
+function xo(){const q=Q.l[Q.i];Q.m=Q.m.filter(x=>x!==q.t);Q.r++;Q.e.parts[0].ok=true;Q.e.parts[0].g+=' (counted correct by you)';Q.e.pts=1;$('#fb').insertAdjacentHTML('afterbegin','<p style="color:var(--ok)"><b>Counted as correct.</b></p>')}
 loadLib();buildS();nav();setup();
