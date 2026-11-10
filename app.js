@@ -224,15 +224,30 @@ function spk(){const t=G.t0,v=$('#ty').value;if(ok(v,t)){R.push({f:'Speed round'
 function spn(good){if(!good){G.miss.push(G.t0);R.push({f:'Speed round',q:mask(G.t0),parts:[{g:'(skipped)',e:G.t0.term,ok:false}],pts:0,max:1})}G.i++;if(G.i>=G.q.length)return spe(1);sp()}
 function spe(c){G.run=false;cancelAnimationFrame(G.raf);if(!c)G.miss.push(...G.q.slice(G.i));done(c?'Deck cleared':'Time is up',G.sc,G.q.length,G.miss,true)}
 
-/* Matching board: click a term, then its definition. A pair only scores if you got it on the first try. */
+/* Matching board: drag a term onto its definition (or the reverse), or tap one then its match. A pair only scores if you got it on the first try. */
 function match(){if(!MX&&!PF)R=[];const p=sh(P()),n=ST.mtPairs,l=[];for(let i=0,bs=MX?Math.ceil(NQ(8)/n):NQ(8);i<bs*n&&i<p.length;i+=n)l.push(p.slice(i,i+n));Q={l,i:0,r:0,m:[],tot:l.reduce((a,b)=>a+b.length,0)};mt()}
-function mt(){const b=Q.l[Q.i];Q.b=b;Q.R=sh(b);Q.s=null;Q.dl=new Set();Q.dr=new Set();Q.x=new Set();V.innerHTML=`<div class="hud"><span>Board ${Q.i+1} / ${Q.l.length}</span><span>Points ${Q.r}</span>${en()}</div><div class="q"><p class="mute">Click a term, then the definition that matches it.</p><div class="mtb"><div>${b.map((t,k)=>`<button class="opt" id="mL${k}" onclick="mp(0,${k})">${esc(t.term)}</button>`).join('')}</div><div>${Q.R.map((t,k)=>`<button class="opt" id="mR${k}" onclick="mp(1,${k})">${mask(t)}</button>`).join('')}</div></div><div class="row" id="nx"></div></div>`}
-function mp(s,k){if(s==0){if(Q.dl.has(k))return;Q.s=k;Q.b.forEach((_,j)=>$('#mL'+j).classList.toggle('on',j==k));return}
-if(Q.s==null||Q.dr.has(k))return;const t=Q.b[Q.s],L=$('#mL'+Q.s),Rr=$('#mR'+k);
-if(Q.R[k]!=t){Q.x.add(t);Rr.classList.add('no');setTimeout(()=>Rr.classList.remove('no'),500);return}
-const clean=!Q.x.has(t);Q.dl.add(Q.s);Q.dr.add(k);L.disabled=Rr.disabled=true;L.classList.remove('on');L.classList.add('good');Rr.classList.add('good');if(clean)Q.r++;else Q.m.push(t);
-R.push({f:'Matching',q:'Match the term <b>'+esc(t.term)+'</b> to its definition',parts:[{g:clean?t.term:'(needed more than one try)',e:t.term,ok:clean}],pts:clean?1:0,max:1});Q.s=null;
-if(Q.dl.size==Q.b.length)$('#nx').innerHTML=`<button class="pri" onclick="Q.i++;Q.i<Q.l.length?mt():done('Matching complete',Q.r,Q.tot,Q.m,true)">${Q.i<Q.l.length-1?'Next':'Finish'}</button>`}
+const mtProg=()=>`Matched ${Q.dl.size} of ${Q.b.length}. A pair only scores if you match it on the first try.`,mtSay=(h,c)=>{const e=$('#mts');if(e){e.className=c||'mute';e.innerHTML=h}};
+function mt(){const b=Q.l[Q.i];Q.b=b;Q.R=sh(b);Q.s=null;Q.dl=new Set();Q.dr=new Set();Q.x=new Set();Q.nc=0;
+const it=(s,k,h)=>`<button type="button" class="opt mtx" data-s="${s}" data-k="${k}" id="m${'LR'[s]}${k}" aria-pressed="false" onclick="mc(event,${s},${k})" onpointerdown="md(event,${s},${k})"><span class="grip" aria-hidden="true">⠿</span><span class="mtt">${h}</span></button>`;
+V.innerHTML=`<div class="hud"><span>Board ${Q.i+1} / ${Q.l.length}</span><span id="mpt">Points ${Q.r}</span>${en()}</div><div class="q"><p class="mute"><b>Drag</b> a term onto its definition (or a definition onto its term). Or <b>tap</b> one, then tap its match.</p><div class="mtb"><div class="mcol"><div class="mh">Terms</div>${b.map((t,k)=>it(0,k,esc(t.term))).join('')}</div><div class="mcol"><div class="mh">Definitions</div>${Q.R.map((t,k)=>it(1,k,mask(t))).join('')}</div></div><p id="mts" class="mute" role="status" aria-live="polite"></p><div class="row" id="nx"></div></div>`;mtSay(mtProg())}
+/* Selection: Q.s={s:side (0 term, 1 definition),k:index} or null. Works from either column. */
+function mSel(s,k){document.querySelectorAll('.mtb .sel').forEach(e=>{e.classList.remove('sel');e.setAttribute('aria-pressed','false')});Q.s=k==null?null:{s,k};$('.mtb').classList.toggle('has',!!Q.s);if(!Q.s)return mtSay(mtProg());
+const e=$('#m'+'LR'[s]+k);e.classList.add('sel');e.setAttribute('aria-pressed','true');mtSay(s?'<b>Definition selected.</b> Now pick the <b>term</b> it describes.':'<b>'+esc(Q.b[k].term)+'</b> selected. Now pick its <b>definition</b>.')}
+function mc(e,s,k){if(Q.nc&&performance.now()-Q.nc<120)return;if(!Q.s)return mSel(s,k);if(Q.s.s==s)return Q.s.k==k?mSel(0,null):mSel(s,k);mTry(Q.s.s,Q.s.k,s,k)}
+/* (s,k) is the item picked or dragged first, (s2,k2) the one it was dropped on or tapped second; they are always on opposite sides. */
+function mTry(s,k,s2,k2){const l=s?k2:k,r=s?k:k2,t=Q.b[l],a=$('#mL'+l),d=$('#mR'+r);if(Q.dl.has(l)||Q.dr.has(r))return;mSel(0,null);
+if(Q.R[r]!=t){Q.x.add(t);[a,d].forEach(e=>{e.classList.add('no','shake');setTimeout(()=>e.classList.remove('no','shake'),600)});return mtSay('Not a match. Try again.','err')}
+const clean=!Q.x.has(t);Q.dl.add(l);Q.dr.add(r);[a,d].forEach(e=>{e.disabled=true;e.classList.add('good')});if(clean)Q.r++;else Q.m.push(t);$('#mpt').textContent='Points '+Q.r;
+R.push({f:'Matching',q:'Match the term <b>'+esc(t.term)+'</b> to its definition',parts:[{g:clean?t.term:'(needed more than one try)',e:t.term,ok:clean}],pts:clean?1:0,max:1});
+if(Q.dl.size==Q.b.length){mtSay('<b>All matched!</b>');$('#nx').innerHTML=`<button class="pri" onclick="Q.i++;Q.i<Q.l.length?mt():done('Matching complete',Q.r,Q.tot,Q.m,true)">${Q.i<Q.l.length-1?'Next':'Finish'}</button>`;$('.pri').focus()}else mtSay('<b>Matched!</b> '+mtProg())}
+/* Drag with pointer events (mouse, pen, touch). Touch drags start from the grip so the page can still scroll. */
+function md(e,s,k){if(e.button>0||(e.pointerType=='touch'&&!e.target.closest('.grip')))return;const el=e.currentTarget,r0=el.getBoundingClientRect(),x0=e.clientX,y0=e.clientY;let g=null,over=null;
+const hit=(x,y)=>{const t=document.elementFromPoint(x,y),o=t&&t.closest('.mtx');return o&&o.dataset.s!=s&&!o.disabled?o:null},
+mv=ev=>{if(!g){if(Math.hypot(ev.clientX-x0,ev.clientY-y0)<6)return;g=el.cloneNode(true);g.removeAttribute('id');g.className='opt mtg';g.style.width=r0.width+'px';document.body.appendChild(g);el.classList.add('drag');mSel(0,null)}
+g.style.transform=`translate(${ev.clientX-(x0-r0.left)}px,${ev.clientY-(y0-r0.top)}px) rotate(-1.5deg)`;const o=hit(ev.clientX,ev.clientY);if(o!=over){over&&over.classList.remove('over');over=o;o&&o.classList.add('over')}
+if(ev.clientY<60)scrollBy(0,-14);else if(ev.clientY>innerHeight-60)scrollBy(0,14)},
+end=(ev,drop)=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',cx);if(!g)return;Q.nc=performance.now();g.remove();el.classList.remove('drag');over&&over.classList.remove('over');const o=drop&&hit(ev.clientX,ev.clientY);if(o)mTry(s,k,+o.dataset.s,+o.dataset.k)},
+up=ev=>end(ev,1),cx=ev=>end(ev,0);addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',cx)}
 
 /* Definition ordering: choose the right definition among the most similar ones (shared words, same category). Reuses the MC screens. */
 const WC=new WeakMap(),wset=t=>WC.get(t)||(WC.set(t,new Set(toks(t.definition).map(x=>x.w.toLowerCase()).filter(w=>w.length>3&&!STOP.has(w)))),WC.get(t)),
