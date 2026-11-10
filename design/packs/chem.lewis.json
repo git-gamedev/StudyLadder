@@ -1,0 +1,99 @@
+{
+  "pack": "chem.lewis",
+  "version": 1,
+  "title": "Lewis structures",
+  "engine": ">=1",
+  "level": "HS to uni",
+  "data": {
+    "valence": { "H": 1, "C": 4, "N": 5, "O": 6, "F": 7, "Cl": 7, "Br": 7, "I": 7, "S": 6, "P": 5 },
+    "octetTarget": { "H": 2, "default": 8 },
+    "formulaOrder": ["C", "H", "N", "O", "P", "S", "F", "Cl", "Br", "I"],
+    "display": { "H3N": "NH3", "SH2": "H2S", "H3P": "PH3" }
+  },
+  "problems": {
+    "structure": {
+      "params": {
+        "elements":     { "type": "list", "of": "symbol", "in": "valence", "default": ["H", "C", "N", "O"] },
+        "maxAtoms":     { "type": "int", "min": 2, "max": 6, "default": 4 },
+        "allowIons":    { "type": "bool", "default": false },
+        "giveSkeleton": { "type": "bool", "default": true }
+      },
+
+      "generate": [
+        { "set": "n",        "to": "randint(2, maxAtoms)" },
+        { "set": "centerEl", "to": "n == 2 ? pick(elements) : pick(filter(elements, e => e != 'H'))" },
+        { "set": "atoms",    "to": "concat([{id:'c', el:centerEl}], map(range(n-1), i => ({id:'t'+i, el:pick(elements)})))" },
+        { "set": "bonds",    "to": "map(range(n-1), i => ({a:'c', b:'t'+i}))" },
+        { "set": "charge",   "to": "allowIons ? pick([-1, 0, 0, 0, 1]) : 0" },
+        { "set": "pos",      "to": "radial('c', map(range(n-1), i => 't'+i))" },
+        { "set": "counts",   "to": "countBy(atoms, a => a.el)" },
+        { "set": "rawFormula", "to": "join(map(sortBy(keys(counts), e => indexOf(formulaOrder, e)), e => e + (counts[e] > 1 ? sub(counts[e]) : '')), '')" },
+        { "set": "formula",  "to": "display[rawFormula] ?? rawFormula" },
+        { "set": "witness",  "solve": { "over": "input.state", "hard": ["electrons", "octets", "connected"], "minimize": "fcTotal", "budget": 20000 } },
+        { "require": "witness != null" }
+      ],
+      "key": "formula + charge",
+
+      "prompt": "Draw the Lewis structure of {formula}{charge == 0 ? '' : ' with charge ' + signed(charge)}.",
+
+      "input": {
+        "type": "structure",
+        "atoms": "atoms",
+        "pos": "pos",
+        "bonds": {
+          "initial": "giveSkeleton ? map(bonds, b => ({a:b.a, b:b.b, order:1})) : []",
+          "edit": "giveSkeleton ? 'order' : 'connect+order'",
+          "order": [1, 3]
+        },
+        "marks": { "lp": { "per": "atom", "min": 0, "max": 4, "label": "lone pair" } },
+        "touch": { "bond": "tap cycles order", "lp": "tap an atom side to add, long-press to remove" }
+      },
+
+      "derive": {
+        "total":   "sum(atoms, a => valence[a.el]) - charge",
+        "used":    "2 * sum(s.bonds, b => b.order) + 2 * sum(atoms, a => s.lp[a.id])",
+        "bondsOf": "a => sum(filter(s.bonds, b => b.a == a.id || b.b == a.id), b => b.order)",
+        "full":    "a => 2 * s.lp[a.id] + 2 * bondsOf(a)",
+        "target":  "a => octetTarget[a.el] ?? octetTarget.default",
+        "fc":      "a => valence[a.el] - 2 * s.lp[a.id] - bondsOf(a)",
+        "fcTotal": "sum(atoms, a => abs(fc(a)))",
+        "bestFc":  "evalWith(witness, 'fcTotal')"
+      },
+
+      "check": [
+        { "id": "electrons", "pts": 1, "hard": true,
+          "test": "used == total",
+          "msg": "Your structure uses {used} electrons. It needs exactly {total}." },
+        { "id": "octets", "pts": 2, "hard": true,
+          "blame": "filter(atoms, a => full(a) != target(a))",
+          "msg": "These atoms do not have a full shell: {join(map(blame, a => a.el), ', ')}." },
+        { "id": "connected", "pts": 1, "hard": true,
+          "test": "connected(map(atoms, a => a.id), s.bonds)",
+          "msg": "Every atom must be bonded to the rest of the molecule." },
+        { "id": "formalCharge", "pts": 1,
+          "test": "fcTotal == bestFc",
+          "msg": "A structure with smaller formal charges exists. Try moving a lone pair into a double bond." }
+      ],
+
+      "explain": [
+        { "say": "Valence electrons: {join(map(atoms, a => a.el + ' ' + valence[a.el]), ' + ')}{charge == 0 ? '' : ' adjusted for the charge'} = {total}." },
+        { "say": "Put the least electronegative non-H atom in the middle, bond it to each neighbour, then give every atom a full shell." },
+        { "show": "witness" }
+      ],
+
+      "selftest": {
+        "n": 60,
+        "witnessAsAnswer": true,
+        "corrupt": [
+          { "name": "missing lone pair",
+            "mutate": "patch(s, 'lp.' + pick(filter(atoms, a => s.lp[a.id] > 0)).id, -1)",
+            "mustFail": ["electrons"] },
+          { "name": "bond order raised without removing lone pairs",
+            "mutate": "patch(s, 'bonds.0.order', 1)",
+            "skipIfInvalid": true,
+            "mustFail": ["electrons"] }
+        ]
+      }
+    }
+  }
+}
