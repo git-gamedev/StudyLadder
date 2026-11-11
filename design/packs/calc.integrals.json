@@ -6,119 +6,324 @@
   "level": "HS calculus to uni",
   "data": {
     "families": [
-      { "id": "power", "technique": "power rule",
-        "vars": { "n": "randint(2,6)", "c": "randint(1,9)" },
-        "f": "{c}*x^{n}", "F": "{c}/({n}+1)*x^({n}+1)",
-        "domain": ["-3", "3"], "bounds": ["0", "3"] },
-
-      { "id": "exp", "technique": "exponential",
-        "vars": { "a": "randint(2,5) * pick([-1,1])", "c": "randint(1,9)" },
-        "f": "{c}*exp({a}*x)", "F": "{c}/{a}*exp({a}*x)",
-        "domain": ["-2", "2"], "bounds": ["0", "1"] },
-
-      { "id": "trig", "technique": "trig function",
-        "vars": { "a": "randint(2,5)", "c": "randint(1,9)" },
-        "f": "{c}*cos({a}*x)", "F": "{c}/{a}*sin({a}*x)",
-        "domain": ["-3", "3"], "bounds": ["0", "pi/{a}"] },
-
-      { "id": "usub", "technique": "u-substitution",
-        "vars": { "b": "randint(1,5)", "n": "randint(2,5)" },
-        "f": "x*(x^2+{b})^{n}", "F": "(x^2+{b})^({n}+1)/(2*({n}+1))",
-        "domain": ["-3", "3"], "bounds": ["0", "1"] },
-
-      { "id": "recip", "technique": "logarithmic",
-        "vars": { "b": "randint(1,5)", "c": "randint(1,9)" },
-        "f": "{c}/(x+{b})", "F": "{c}*ln(abs(x+{b}))",
-        "domain": ["0.5-{b}", "4-{b}"], "bounds": ["0", "2"] },
-
-      { "id": "partsExp", "technique": "integration by parts",
-        "vars": { "a": "randint(2,4) * pick([-1,1])" },
-        "f": "x*exp({a}*x)", "F": "(x/{a}-1/{a}^2)*exp({a}*x)",
-        "domain": ["-2", "2"], "bounds": ["0", "1"] },
-
-      { "id": "partsCos", "technique": "integration by parts",
-        "vars": { "a": "randint(2,4)" },
-        "f": "x*cos({a}*x)", "F": "x*sin({a}*x)/{a}+cos({a}*x)/{a}^2",
-        "domain": ["-2", "2"], "bounds": ["0", "pi/{a}"] }
+      {
+        "id": "power",
+        "technique": "power rule",
+        "vars": {
+          "n": "randint(2,6)",
+          "c": "randint(1,9)"
+        },
+        "f": "{c}*x^{n}",
+        "F": "{c}/({n}+1)*x^({n}+1)",
+        "domain": [
+          "-3",
+          "3"
+        ],
+        "bounds": [
+          "0",
+          "3"
+        ]
+      },
+      {
+        "id": "exp",
+        "technique": "exponential",
+        "vars": {
+          "a": "randint(2,5) * pick([-1,1])",
+          "c": "randint(1,9)"
+        },
+        "f": "{c}*exp({a}*x)",
+        "F": "{c}/{a}*exp({a}*x)",
+        "domain": [
+          "-2",
+          "2"
+        ],
+        "bounds": [
+          "0",
+          "1"
+        ]
+      },
+      {
+        "id": "trig",
+        "technique": "trig function",
+        "vars": {
+          "a": "randint(2,5)",
+          "c": "randint(1,9)"
+        },
+        "f": "{c}*cos({a}*x)",
+        "F": "{c}/{a}*sin({a}*x)",
+        "domain": [
+          "-3",
+          "3"
+        ],
+        "bounds": [
+          "0",
+          "pi/{a}"
+        ]
+      },
+      {
+        "id": "usub",
+        "technique": "u-substitution",
+        "vars": {
+          "b": "randint(1,5)",
+          "n": "randint(2,5)"
+        },
+        "f": "x*(x^2+{b})^{n}",
+        "F": "(x^2+{b})^({n}+1)/(2*({n}+1))",
+        "domain": [
+          "-3",
+          "3"
+        ],
+        "bounds": [
+          "0",
+          "1"
+        ]
+      },
+      {
+        "id": "recip",
+        "technique": "logarithmic",
+        "vars": {
+          "b": "randint(1,5)",
+          "c": "randint(1,9)"
+        },
+        "f": "{c}/(x+{b})",
+        "F": "{c}*ln(abs(x+{b}))",
+        "domain": [
+          "0.5-{b}",
+          "4-{b}"
+        ],
+        "bounds": [
+          "0",
+          "2"
+        ]
+      },
+      {
+        "id": "partsExp",
+        "technique": "integration by parts",
+        "vars": {
+          "a": "randint(2,4) * pick([-1,1])"
+        },
+        "f": "x*exp({a}*x)",
+        "F": "(x/{a}-1/{a}^2)*exp({a}*x)",
+        "domain": [
+          "-2",
+          "2"
+        ],
+        "bounds": [
+          "0",
+          "1"
+        ]
+      },
+      {
+        "id": "partsCos",
+        "technique": "integration by parts",
+        "vars": {
+          "a": "randint(2,4)"
+        },
+        "f": "x*cos({a}*x)",
+        "F": "x*sin({a}*x)/{a}+cos({a}*x)/{a}^2",
+        "domain": [
+          "-2",
+          "2"
+        ],
+        "bounds": [
+          "0",
+          "pi/{a}"
+        ]
+      }
     ]
   },
-
   "problems": {
     "integral": {
       "params": {
-        "kind":       { "type": "enum", "values": ["indefinite", "definite"], "default": "indefinite" },
-        "techniques": { "type": "list", "of": "familyId", "in": "families.id",
-                        "default": ["power", "exp", "trig", "usub", "recip", "partsExp", "partsCos"] },
-        "requireC":   { "type": "bool", "default": true }
+        "kind": {
+          "type": "enum",
+          "values": [
+            "indefinite",
+            "definite"
+          ],
+          "default": "indefinite"
+        },
+        "techniques": {
+          "type": "list",
+          "of": "familyId",
+          "in": "families.id",
+          "default": [
+            "power",
+            "exp",
+            "trig",
+            "usub",
+            "recip",
+            "partsExp",
+            "partsCos"
+          ]
+        },
+        "requireC": {
+          "type": "bool",
+          "default": true
+        }
       },
-
       "generate": [
-        { "set": "fam",   "to": "pick(filter(families, f => contains(techniques, f.id)))" },
-        { "set": "v",     "to": "mapValues(fam.vars, e => calc(e))" },
-        { "set": "f",     "to": "parseExpr(subst(fam.f, v))" },
-        { "set": "F",     "to": "parseExpr(subst(fam.F, v))" },
-        { "set": "dom",   "to": "map(fam.domain, e => calc(subst(e, v)))" },
-        { "set": "lo",    "to": "calc(subst(fam.bounds[0], v))" },
-        { "set": "hi",    "to": "calc(subst(fam.bounds[1], v))" },
-        { "set": "truth", "to": "integrate(f, 'x', lo, hi)" },
-        { "require": "abs(truth - (evalNum(F, {x: hi}) - evalNum(F, {x: lo}))) < 1e-8" },
-        { "require": "equivalent(d(F, 'x'), f, {over: {x: dom}, samples: 20, tol: 1e-9})" }
+        {
+          "set": "fam",
+          "to": "pick(filter(families, f => contains(techniques, f.id)))"
+        },
+        {
+          "set": "v",
+          "to": "mapValues(fam.vars, e => calc(e))"
+        },
+        {
+          "set": "f",
+          "to": "parseExpr(subst(fam.f, v))"
+        },
+        {
+          "set": "F",
+          "to": "parseExpr(subst(fam.F, v))"
+        },
+        {
+          "set": "dom",
+          "to": "map(fam.domain, e => calc(subst(e, v)))"
+        },
+        {
+          "set": "loE",
+          "to": "parseExpr(subst(fam.bounds[0], v))"
+        },
+        {
+          "set": "hiE",
+          "to": "parseExpr(subst(fam.bounds[1], v))"
+        },
+        {
+          "set": "lo",
+          "to": "evalNum(loE, {})"
+        },
+        {
+          "set": "hi",
+          "to": "evalNum(hiE, {})"
+        },
+        {
+          "set": "truth",
+          "to": "integrate(f, 'x', lo, hi)"
+        },
+        {
+          "require": "abs(truth - (evalNum(F, {x: hi}) - evalNum(F, {x: lo}))) < 1e-8"
+        },
+        {
+          "require": "equivalent(d(F, 'x'), f, {over: {x: dom}, samples: 20, tol: 1e-9})"
+        }
       ],
       "key": "kind + tex(f)",
-
       "prompt": [
-        { "if": "kind == 'indefinite'", "say": "Find $$\\int {tex(f)}\\,dx$$" },
-        { "if": "kind == 'definite'",   "say": "Evaluate the definite integral of ${tex(f)}$ from $x = {tex(lo)}$ to $x = {tex(hi)}$. Exact values such as $\\pi/4$ or $\\ln 2$ are fine." }
+        {
+          "if": "kind == 'indefinite'",
+          "say": "Find the integral of {tex(f)} dx."
+        },
+        {
+          "if": "kind == 'definite'",
+          "say": "Evaluate the definite integral of {tex(f)} dx from x = {tex(loE)} to x = {tex(hiE)}. Exact answers such as pi/4 or ln(2) are fine."
+        }
       ],
-
       "input": {
         "type": "mathExpr",
         "vars": "kind == 'indefinite' ? ['x', 'C'] : []",
-        "constants": ["pi", "e"],
-        "keys": ["frac", "pow", "sqrt", "exp", "ln", "sin", "cos", "pi"]
+        "constants": [
+          "pi",
+          "e"
+        ],
+        "keys": [
+          "frac",
+          "pow",
+          "sqrt",
+          "exp",
+          "ln",
+          "sin",
+          "cos",
+          "pi"
+        ],
+        "help": "Type your answer. Use x, numbers, + - * / ^, and sin(x), cos(x), exp(x), ln(x), sqrt(x), abs(x), pi."
       },
-
       "derive": {
-        "sd":  "d(s.ast, 'x')",
+        "sd": "d(s.ast, 'x')",
         "val": "evalNum(s.ast, {})"
       },
-
       "check": [
-        { "id": "parse", "gate": true, "pts": 0,
+        {
+          "id": "parse",
+          "gate": true,
+          "pts": 0,
           "test": "s.ast != null",
-          "msg": "I couldn't read that as an expression: {s.error}" },
-
-        { "id": "symbols", "when": "kind == 'indefinite'", "gate": true, "pts": 0,
+          "msg": "{s.error}"
+        },
+        {
+          "id": "symbols",
+          "when": "kind == 'indefinite'",
+          "gate": true,
+          "pts": 0,
           "test": "subset(symbols(s.ast), ['x', 'C'])",
-          "msg": "Use only x, and C for the constant." },
-
-        { "id": "derivative", "when": "kind == 'indefinite'", "pts": 3,
+          "msg": "Use only x, and C for the constant."
+        },
+        {
+          "id": "derivative",
+          "when": "kind == 'indefinite'",
+          "pts": 3,
           "test": "equivalent(sd, f, {over: {x: dom}, samples: 20, tol: 1e-6})",
-          "msg": "Differentiating your answer gives {tex(sd)}, but the integrand is {tex(f)}." },
-
-        { "id": "constant", "when": "kind == 'indefinite' && requireC", "pts": 1,
+          "msg": "Differentiating your answer gives {tex(sd)}, but the integrand is {tex(f)}."
+        },
+        {
+          "id": "constant",
+          "when": "kind == 'indefinite' && requireC",
+          "pts": 1,
           "test": "contains(symbols(s.ast), 'C')",
-          "msg": "Don't forget the constant of integration, + C." },
-
-        { "id": "value", "when": "kind == 'definite'", "pts": 4,
+          "msg": "Don't forget the constant of integration, + C."
+        },
+        {
+          "id": "value",
+          "when": "kind == 'definite'",
+          "pts": 4,
           "test": "approx(val, truth, 1e-6)",
-          "msg": "Your value is about {round(val, 4)}. Check your antiderivative and the limits." }
+          "msg": "{val != val ? 'Your answer still has x in it. A definite integral is a single number.' : 'Your value is about ' + round(val, 4) + '. Check your antiderivative and the limits.'}"
+        }
       ],
-
       "explain": [
-        { "say": "This one is {fam.technique}. An antiderivative is ${tex(F)}$." },
-        { "if": "kind == 'definite'", "say": "Evaluate it at the limits and subtract: about {round(truth, 6)}." }
+        {
+          "say": "This one is {fam.technique}. An antiderivative is {tex(F)}."
+        },
+        {
+          "if": "kind == 'definite'",
+          "say": "Evaluate it at the limits and subtract: about {round(truth, 6)}."
+        }
       ],
-
       "selftest": {
         "n": 80,
-        "witnessAsAnswer": { "indefinite": "plus(F, parseExpr('C'))", "definite": "num(truth)" },
+        "witnessAsAnswer": {
+          "indefinite": "plus(F, parseExpr('C'))",
+          "definite": "num(truth)"
+        },
         "corrupt": [
-          { "name": "doubled",       "mutate": "times(s.ast, 2)",                 "mustFail": ["derivative", "value"] },
-          { "name": "extra x term",  "mutate": "plus(s.ast, parseExpr('x'))",     "mustFail": ["derivative", "value"] },
-          { "name": "forgot C",      "mutate": "dropSymbol(s.ast, 'C')",          "mustFail": ["constant"] }
+          {
+            "name": "doubled",
+            "mutate": "times(s.ast, 2)",
+            "mustFail": [
+              "derivative",
+              "value"
+            ]
+          },
+          {
+            "name": "extra x term",
+            "mutate": "plus(s.ast, parseExpr('x'))",
+            "mustFail": [
+              "derivative",
+              "value"
+            ]
+          },
+          {
+            "name": "forgot C",
+            "mutate": "dropSymbol(s.ast, 'C')",
+            "mustFail": [
+              "constant"
+            ]
+          }
         ]
-      }
+      },
+      "answer": "kind == 'indefinite' ? tex(F) + ' + C' : round(truth, 6)"
     }
   }
 }

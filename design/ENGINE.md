@@ -1,6 +1,8 @@
 # Problem engine: design draft v1
 
-Status: paper design. No app code yet. Three reference packs in `packs/` are the test of the format.
+Status: first slice implemented in `problems.js` (interpreter, pack loader, self-test, `mathExpr` input, Problems level).
+Only `calc.integrals` runs today. `chem.lewis` and `geometry.congruence` are rejected on upload with a clear message until
+the `structure` and `stepChain` inputs exist. Prompts use plain text (no KaTeX).
 
 ## 1. Principle
 
