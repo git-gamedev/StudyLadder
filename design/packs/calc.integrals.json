@@ -258,7 +258,7 @@
           "gate": true,
           "pts": 0,
           "test": "subset(symbols(s.ast), ['x', 'C'])",
-          "msg": "Use only x, and C for the constant."
+          "msg": "Use only x, and C for the constant. I don't recognise: {join(filter(symbols(s.ast), a => a != 'x' && a != 'C'), ', ')}."
         },
         {
           "id": "derivative",

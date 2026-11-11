@@ -22,6 +22,24 @@ const PE = (() => {
     return t;
   }
   const MFN = ['exp', 'ln', 'sin', 'cos', 'tan', 'abs', 'sqrt', 'sign'];
+  /* friendly input: Sin, PI, lowercase c for the constant, and sin 5x without brackets */
+  const fixId = v => { const l = v.toLowerCase(); return l == 'c' ? 'C' : (MFN.includes(l) || l == 'pi' || l == 'e') ? l : v; };
+  function wrapFns(t) {
+    const o = [], isOp = (x, v) => x && x.t == 'op' && x.v == v;
+    for (let i = 0; i < t.length; i++) {
+      const a = t[i]; o.push(a);
+      if (a.t != 'id' || !MFN.includes(a.v) || !t[i + 1] || isOp(t[i + 1], '(')) continue;
+      let j = i + 1; const arg = [];
+      while (j < t.length) {
+        const b = t[j], prev = arg[arg.length - 1];
+        if (b.t == 'num' || (b.t == 'id' && !MFN.includes(b.v)) || isOp(b, '^')) { arg.push(b); j++; }
+        else if (isOp(b, '(') && isOp(prev, '^')) { let d = 0; do { if (isOp(t[j], '(')) d++; if (isOp(t[j], ')')) d--; arg.push(t[j++]); } while (d && j < t.length); }
+        else break;
+      }
+      if (arg.length) { o.push({ t: 'op', v: '(' }, ...arg, { t: 'op', v: ')' }); i = j - 1; }
+    }
+    return o;
+  }
   function implicit(t) {
     const o = [];
     t.forEach((b, k) => {
@@ -41,7 +59,7 @@ const PE = (() => {
   function parse(src, math) {
     const key = (math ? 'm:' : 'j:') + src;
     if (cache.has(key)) return cache.get(key);
-    let toks = lex(src); if (math) toks = implicit(toks);
+    let toks = lex(src); if (math) toks = implicit(wrapFns(toks.map(t => t.t == 'id' ? { ...t, v: fixId(t.v) } : t)));
     let p = 0;
     const peek = () => toks[p], isOp = v => toks[p] && toks[p].t == 'op' && toks[p].v == v;
     const eat = v => { if (!isOp(v)) throw Error('Expected ' + v); p++; };
