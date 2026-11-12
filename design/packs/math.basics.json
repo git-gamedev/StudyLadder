@@ -1,0 +1,391 @@
+{
+  "pack": "math.basics",
+  "version": 1,
+  "title": "Basics: every simple input type",
+  "engine": ">=1",
+  "level": "K to HS",
+  "problems": {
+    "add": {
+      "params": {
+        "max": {
+          "type": "int",
+          "min": 5,
+          "max": 100,
+          "default": 20
+        }
+      },
+      "generate": [
+        {
+          "set": "a",
+          "to": "randint(1, max)"
+        },
+        {
+          "set": "b",
+          "to": "randint(1, max)"
+        }
+      ],
+      "key": "a + '+' + b",
+      "prompt": "What is {a} + {b}?",
+      "input": {
+        "type": "value"
+      },
+      "derive": {},
+      "check": [
+        {
+          "id": "parse",
+          "gate": true,
+          "pts": 0,
+          "test": "s.num == s.num",
+          "msg": "Type a number."
+        },
+        {
+          "id": "sum",
+          "pts": 1,
+          "test": "s.num == a + b",
+          "msg": "Not quite. Count up from {a}."
+        }
+      ],
+      "answer": "a + b",
+      "explain": "{a} + {b} = {a + b}",
+      "selftest": {
+        "n": 20,
+        "witnessAsAnswer": "{text: str(a + b), num: a + b, unit: '', sig: 1, error: null}",
+        "corrupt": [
+          {
+            "name": "off by one",
+            "mutate": "patch(s, 'num', 1)",
+            "mustFail": [
+              "sum"
+            ]
+          }
+        ]
+      }
+    },
+    "compare": {
+      "generate": [
+        {
+          "set": "a",
+          "to": "randint(1, 50)"
+        },
+        {
+          "set": "b",
+          "to": "randint(51, 99)"
+        },
+        {
+          "set": "opts",
+          "to": "shuffle([a, b])"
+        }
+      ],
+      "key": "str(a) + str(b)",
+      "prompt": "Which number is larger?",
+      "input": {
+        "type": "choice",
+        "options": "map(opts, x => ({id: str(x), text: str(x)}))"
+      },
+      "check": [
+        {
+          "id": "pick",
+          "pts": 1,
+          "test": "s.sel[0] == str(max(a, b))",
+          "msg": "Look at the tens digit first."
+        }
+      ],
+      "answer": "max(a, b)",
+      "selftest": {
+        "n": 20,
+        "witnessAsAnswer": "{sel: [str(max(a, b))]}",
+        "corrupt": [
+          {
+            "name": "wrong one",
+            "mutate": "{sel: [str(min(a, b))]}",
+            "mustFail": [
+              "pick"
+            ]
+          }
+        ]
+      }
+    },
+    "sort": {
+      "generate": [
+        {
+          "set": "nums",
+          "to": "map(range(4), i => randint(1, 9) + 10 * i)"
+        },
+        {
+          "set": "items",
+          "to": "shuffle(map(nums, n => ({id: 'n' + n, text: str(n)})))"
+        }
+      ],
+      "prompt": "Put these numbers in order from smallest to largest.",
+      "input": {
+        "type": "order",
+        "items": "items"
+      },
+      "check": [
+        {
+          "id": "order",
+          "pts": 2,
+          "test": "join(s.order, ',') == join(map(sortBy(nums, n => n), n => 'n' + n), ',')",
+          "msg": "Compare the tens first."
+        }
+      ],
+      "answer": "join(sortBy(nums, n => n), ' < ')",
+      "selftest": {
+        "n": 20,
+        "witnessAsAnswer": "{order: map(sortBy(nums, n => n), n => 'n' + n)}",
+        "corrupt": [
+          {
+            "name": "reversed",
+            "mutate": "{order: reverse(s.order)}",
+            "mustFail": [
+              "order"
+            ]
+          }
+        ]
+      }
+    },
+    "primes": {
+      "generate": [
+        {
+          "set": "pr",
+          "to": "[2, 3, 5, 7, 11]"
+        },
+        {
+          "set": "items",
+          "to": "map(range(11), i => ({id: str(i + 2), at: [i, 0], label: str(i + 2)}))"
+        }
+      ],
+      "prompt": "Select every prime number.",
+      "input": {
+        "type": "scene",
+        "mode": "mark",
+        "items": "items",
+        "plane": {
+          "x": [
+            -1,
+            11
+          ],
+          "y": [
+            -1,
+            1
+          ]
+        }
+      },
+      "check": [
+        {
+          "id": "marks",
+          "pts": 2,
+          "blame": "filter(items, i => contains(map(pr, p => str(p)), i.id) != contains(s.sel, i.id))",
+          "msg": "Some numbers are wrong. A prime has exactly two factors."
+        }
+      ],
+      "answer": "join(pr, ', ')",
+      "selftest": {
+        "n": 5,
+        "witnessAsAnswer": "{sel: map(pr, p => str(p))}",
+        "corrupt": [
+          {
+            "name": "adds 9",
+            "mutate": "{sel: concat(s.sel, ['9'])}",
+            "mustFail": [
+              "marks"
+            ]
+          },
+          {
+            "name": "drops 5",
+            "mutate": "{sel: filter(s.sel, x => x != '5')}",
+            "mustFail": [
+              "marks"
+            ]
+          }
+        ]
+      }
+    },
+    "plot": {
+      "generate": [
+        {
+          "set": "px",
+          "to": "randint(-4, 4)"
+        },
+        {
+          "set": "py",
+          "to": "randint(-4, 4)"
+        }
+      ],
+      "key": "px + ',' + py",
+      "prompt": "Plot the point ({px}, {py}).",
+      "input": {
+        "type": "scene",
+        "mode": "place",
+        "plane": {
+          "x": [
+            -5,
+            5
+          ],
+          "y": [
+            -5,
+            5
+          ],
+          "step": 1
+        },
+        "max": 1
+      },
+      "check": [
+        {
+          "id": "point",
+          "pts": 1,
+          "test": "count(s.points) == 1 && s.points[0][0] == px && s.points[0][1] == py",
+          "msg": "x goes across first, then y goes up or down."
+        }
+      ],
+      "answer": "'(' + px + ', ' + py + ')'",
+      "selftest": {
+        "n": 20,
+        "witnessAsAnswer": "{points: [[px, py]]}",
+        "corrupt": [
+          {
+            "name": "swapped",
+            "mutate": "{points: [[py, px]]}",
+            "mustFail": [
+              "point"
+            ]
+          }
+        ]
+      }
+    },
+    "line": {
+      "generate": [
+        {
+          "set": "m",
+          "to": "randint(1, 3)"
+        },
+        {
+          "set": "c",
+          "to": "randint(-2, 2)"
+        }
+      ],
+      "key": "m + ',' + c",
+      "prompt": "Plot two points on the line y = {m}x + ({c}).",
+      "input": {
+        "type": "scene",
+        "mode": "place",
+        "plane": {
+          "x": [
+            -5,
+            5
+          ],
+          "y": [
+            -5,
+            5
+          ],
+          "step": 1
+        },
+        "max": 2,
+        "draw": {
+          "items": []
+        }
+      },
+      "check": [
+        {
+          "id": "two",
+          "pts": 1,
+          "test": "count(s.points) == 2",
+          "msg": "Plot exactly two points."
+        },
+        {
+          "id": "on",
+          "pts": 2,
+          "test": "count(s.points) == 2 && all(s.points, p => p[1] == m * p[0] + c)",
+          "msg": "Each point must satisfy y = {m}x + ({c})."
+        }
+      ],
+      "selftest": {
+        "n": 20,
+        "witnessAsAnswer": "{points: [[0, c], [1, m + c]]}",
+        "corrupt": [
+          {
+            "name": "off the line",
+            "mutate": "{points: [[0, c], [1, m + c + 1]]}",
+            "mustFail": [
+              "on"
+            ]
+          }
+        ]
+      }
+    },
+    "truth": {
+      "generate": [
+        {
+          "set": "op",
+          "to": "pick(['AND', 'OR'])"
+        }
+      ],
+      "key": "op",
+      "prompt": "Complete the truth table for p {op} q.",
+      "input": {
+        "type": "grid",
+        "header": [
+          "p",
+          "q",
+          "op",
+          "result"
+        ],
+        "rows": "[[ 'T','T',{text:op},{id:'r0',input:'select',options:['T','F']}], ['T','F',{text:op},{id:'r1',input:'select',options:['T','F']}], ['F','T',{text:op},{id:'r2',input:'select',options:['T','F']}], ['F','F',{text:op},{id:'r3',input:'select',options:['T','F']}]]"
+      },
+      "derive": {
+        "want": "op == 'AND' ? {r0:'T', r1:'F', r2:'F', r3:'F'} : {r0:'T', r1:'T', r2:'T', r3:'F'}"
+      },
+      "check": [
+        {
+          "id": "cells",
+          "pts": 4,
+          "blame": "filter(keys(want), k => s.cells[k] != want[k])",
+          "msg": "Check the rows marked wrong. {op} is true when {op == 'AND' ? 'both are true' : 'at least one is true'}."
+        }
+      ],
+      "answer": "join(values(want), ' ')",
+      "selftest": {
+        "n": 6,
+        "witnessAsAnswer": "{cells: want}",
+        "corrupt": [
+          {
+            "name": "all flipped",
+            "mutate": "{cells: mapValues(s.cells, v => v == 'T' ? 'F' : 'T')}",
+            "mustFail": [
+              "cells"
+            ]
+          }
+        ]
+      }
+    },
+    "explain": {
+      "generate": [],
+      "prompt": "In your own words, why is 0.5 the same as 1/2? Then tick what your answer covered.",
+      "input": {
+        "type": "rubric",
+        "items": "[{id:'half',text:'Says 1/2 means one of two equal parts'},{id:'dec',text:'Links 0.5 to five tenths'},{id:'check',text:'Shows 5/10 simplifies to 1/2'}]"
+      },
+      "check": [
+        {
+          "id": "covered",
+          "pts": 3,
+          "test": "count(s.checked) >= 2",
+          "msg": "A full answer covers at least two of the points."
+        }
+      ],
+      "selftest": {
+        "n": 2,
+        "witnessAsAnswer": "{checked: ['half', 'dec', 'check']}",
+        "corrupt": [
+          {
+            "name": "nothing ticked",
+            "mutate": "{checked: []}",
+            "mustFail": [
+              "covered"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

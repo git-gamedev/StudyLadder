@@ -6,187 +6,1006 @@
   "level": "HS",
   "data": {
     "grammar": {
-      "seg":      { "args": ["pt", "pt"],       "show": "{0}{1}" },
-      "ang":      { "args": ["pt", "pt", "pt"], "show": "∠{0}{1}{2}" },
-      "tri":      { "args": ["pt", "pt", "pt"], "show": "△{0}{1}{2}" },
-      "≅":        { "args": ["term", "term"],   "show": "{0} ≅ {1}", "sameKind": true },
-      "midpoint": { "args": ["pt", "pt", "pt"], "show": "{0} is the midpoint of {1}{2}" },
-      "segment":  { "args": ["pt", "pt"],       "factOnly": true },
-      "between":  { "args": ["pt", "pt", "pt"], "factOnly": true }
+      "seg": {
+        "args": [
+          "pt",
+          "pt"
+        ],
+        "show": "{0}{1}"
+      },
+      "ang": {
+        "args": [
+          "pt",
+          "pt",
+          "pt"
+        ],
+        "show": "∠{0}{1}{2}"
+      },
+      "tri": {
+        "args": [
+          "pt",
+          "pt",
+          "pt"
+        ],
+        "show": "△{0}{1}{2}"
+      },
+      "≅": {
+        "args": [
+          "term",
+          "term"
+        ],
+        "show": "{0} ≅ {1}",
+        "sameKind": true
+      },
+      "midpoint": {
+        "args": [
+          "pt",
+          "pt",
+          "pt"
+        ],
+        "show": "{0} is the midpoint of {1}{2}"
+      },
+      "segment": {
+        "args": [
+          "pt",
+          "pt"
+        ],
+        "factOnly": true
+      },
+      "between": {
+        "args": [
+          "pt",
+          "pt",
+          "pt"
+        ],
+        "factOnly": true
+      }
     },
-
     "canon": {
-      "seg":      { "symmetries": [[1, 0]] },
-      "ang":      { "symmetries": [[2, 1, 0]] },
-      "tri":      { "symmetries": "all" },
-      "midpoint": { "symmetries": [[0, 2, 1]] },
-      "≅":        { "swapSides": true, "coupledSymmetry": "tri" },
-      "segment":  { "symmetries": [[1, 0]] },
-      "between":  { "symmetries": [[2, 1, 0]] }
+      "seg": {
+        "symmetries": [
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      "ang": {
+        "symmetries": [
+          [
+            2,
+            1,
+            0
+          ]
+        ]
+      },
+      "tri": {
+        "symmetries": "all"
+      },
+      "midpoint": {
+        "symmetries": [
+          [
+            0,
+            2,
+            1
+          ]
+        ]
+      },
+      "≅": {
+        "swapSides": true,
+        "coupledSymmetry": "tri"
+      },
+      "segment": {
+        "symmetries": [
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      "between": {
+        "symmetries": [
+          [
+            2,
+            1,
+            0
+          ]
+        ]
+      }
     },
-
     "rules": [
-      { "id": "given", "label": "Given", "special": "given" },
-
-      { "id": "reflexive", "label": "Reflexive property",
-        "premises": [ { "fact": ["segment", "?a", "?b"] } ],
-        "conclusions": [ ["≅", ["seg", "?a", "?b"], ["seg", "?a", "?b"]] ] },
-
-      { "id": "vertical", "label": "Vertical angles are congruent",
-        "premises": [ { "fact": ["between", "?a", "?e", "?c"] }, { "fact": ["between", "?b", "?e", "?d"] } ],
+      {
+        "id": "given",
+        "label": "Given",
+        "special": "given"
+      },
+      {
+        "id": "reflexive",
+        "label": "Reflexive property",
+        "premises": [
+          {
+            "fact": [
+              "segment",
+              "?a",
+              "?b"
+            ]
+          }
+        ],
         "conclusions": [
-          ["≅", ["ang", "?a", "?e", "?b"], ["ang", "?c", "?e", "?d"]],
-          ["≅", ["ang", "?a", "?e", "?d"], ["ang", "?c", "?e", "?b"]]
-        ] },
-
-      { "id": "defMidpoint", "label": "Definition of midpoint",
-        "premises": [ { "line": ["midpoint", "?m", "?a", "?b"] } ],
-        "conclusions": [ ["≅", ["seg", "?a", "?m"], ["seg", "?m", "?b"]] ] },
-
-      { "id": "transitive", "label": "Transitive property",
-        "premises": [ { "line": ["≅", "?x", "?y"] }, { "line": ["≅", "?y", "?z"] } ],
-        "conclusions": [ ["≅", "?x", "?z"] ] },
-
-      { "id": "SSS", "label": "SSS",
+          [
+            "≅",
+            [
+              "seg",
+              "?a",
+              "?b"
+            ],
+            [
+              "seg",
+              "?a",
+              "?b"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "vertical",
+        "label": "Vertical angles are congruent",
         "premises": [
-          { "line": ["≅", ["seg", "?a", "?b"], ["seg", "?d", "?e"]] },
-          { "line": ["≅", ["seg", "?b", "?c"], ["seg", "?e", "?f"]] },
-          { "line": ["≅", ["seg", "?a", "?c"], ["seg", "?d", "?f"]] } ],
-        "conclusions": [ ["≅", ["tri", "?a", "?b", "?c"], ["tri", "?d", "?e", "?f"]] ] },
-
-      { "id": "SAS", "label": "SAS",
-        "premises": [
-          { "line": ["≅", ["seg", "?a", "?b"], ["seg", "?d", "?e"]] },
-          { "line": ["≅", ["ang", "?a", "?b", "?c"], ["ang", "?d", "?e", "?f"]] },
-          { "line": ["≅", ["seg", "?b", "?c"], ["seg", "?e", "?f"]] } ],
-        "conclusions": [ ["≅", ["tri", "?a", "?b", "?c"], ["tri", "?d", "?e", "?f"]] ] },
-
-      { "id": "ASA", "label": "ASA",
-        "premises": [
-          { "line": ["≅", ["ang", "?c", "?a", "?b"], ["ang", "?f", "?d", "?e"]] },
-          { "line": ["≅", ["seg", "?a", "?b"], ["seg", "?d", "?e"]] },
-          { "line": ["≅", ["ang", "?a", "?b", "?c"], ["ang", "?d", "?e", "?f"]] } ],
-        "conclusions": [ ["≅", ["tri", "?a", "?b", "?c"], ["tri", "?d", "?e", "?f"]] ] },
-
-      { "id": "CPCTC", "label": "CPCTC",
-        "premises": [ { "line": ["≅", ["tri", "?a", "?b", "?c"], ["tri", "?d", "?e", "?f"]] } ],
+          {
+            "fact": [
+              "between",
+              "?a",
+              "?e",
+              "?c"
+            ]
+          },
+          {
+            "fact": [
+              "between",
+              "?b",
+              "?e",
+              "?d"
+            ]
+          }
+        ],
         "conclusions": [
-          ["≅", ["seg", "?a", "?b"], ["seg", "?d", "?e"]],
-          ["≅", ["seg", "?b", "?c"], ["seg", "?e", "?f"]],
-          ["≅", ["seg", "?a", "?c"], ["seg", "?d", "?f"]],
-          ["≅", ["ang", "?b", "?a", "?c"], ["ang", "?e", "?d", "?f"]],
-          ["≅", ["ang", "?a", "?b", "?c"], ["ang", "?d", "?e", "?f"]],
-          ["≅", ["ang", "?a", "?c", "?b"], ["ang", "?d", "?f", "?e"]]
-        ] }
+          [
+            "≅",
+            [
+              "ang",
+              "?a",
+              "?e",
+              "?b"
+            ],
+            [
+              "ang",
+              "?c",
+              "?e",
+              "?d"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "ang",
+              "?a",
+              "?e",
+              "?d"
+            ],
+            [
+              "ang",
+              "?c",
+              "?e",
+              "?b"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "defMidpoint",
+        "label": "Definition of midpoint",
+        "premises": [
+          {
+            "line": [
+              "midpoint",
+              "?m",
+              "?a",
+              "?b"
+            ]
+          }
+        ],
+        "conclusions": [
+          [
+            "≅",
+            [
+              "seg",
+              "?a",
+              "?m"
+            ],
+            [
+              "seg",
+              "?m",
+              "?b"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "transitive",
+        "label": "Transitive property",
+        "premises": [
+          {
+            "line": [
+              "≅",
+              "?x",
+              "?y"
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              "?y",
+              "?z"
+            ]
+          }
+        ],
+        "conclusions": [
+          [
+            "≅",
+            "?x",
+            "?z"
+          ]
+        ]
+      },
+      {
+        "id": "SSS",
+        "label": "SSS",
+        "premises": [
+          {
+            "line": [
+              "≅",
+              [
+                "seg",
+                "?a",
+                "?b"
+              ],
+              [
+                "seg",
+                "?d",
+                "?e"
+              ]
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              [
+                "seg",
+                "?b",
+                "?c"
+              ],
+              [
+                "seg",
+                "?e",
+                "?f"
+              ]
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              [
+                "seg",
+                "?a",
+                "?c"
+              ],
+              [
+                "seg",
+                "?d",
+                "?f"
+              ]
+            ]
+          }
+        ],
+        "conclusions": [
+          [
+            "≅",
+            [
+              "tri",
+              "?a",
+              "?b",
+              "?c"
+            ],
+            [
+              "tri",
+              "?d",
+              "?e",
+              "?f"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "SAS",
+        "label": "SAS",
+        "premises": [
+          {
+            "line": [
+              "≅",
+              [
+                "seg",
+                "?a",
+                "?b"
+              ],
+              [
+                "seg",
+                "?d",
+                "?e"
+              ]
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              [
+                "ang",
+                "?a",
+                "?b",
+                "?c"
+              ],
+              [
+                "ang",
+                "?d",
+                "?e",
+                "?f"
+              ]
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              [
+                "seg",
+                "?b",
+                "?c"
+              ],
+              [
+                "seg",
+                "?e",
+                "?f"
+              ]
+            ]
+          }
+        ],
+        "conclusions": [
+          [
+            "≅",
+            [
+              "tri",
+              "?a",
+              "?b",
+              "?c"
+            ],
+            [
+              "tri",
+              "?d",
+              "?e",
+              "?f"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "ASA",
+        "label": "ASA",
+        "premises": [
+          {
+            "line": [
+              "≅",
+              [
+                "ang",
+                "?c",
+                "?a",
+                "?b"
+              ],
+              [
+                "ang",
+                "?f",
+                "?d",
+                "?e"
+              ]
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              [
+                "seg",
+                "?a",
+                "?b"
+              ],
+              [
+                "seg",
+                "?d",
+                "?e"
+              ]
+            ]
+          },
+          {
+            "line": [
+              "≅",
+              [
+                "ang",
+                "?a",
+                "?b",
+                "?c"
+              ],
+              [
+                "ang",
+                "?d",
+                "?e",
+                "?f"
+              ]
+            ]
+          }
+        ],
+        "conclusions": [
+          [
+            "≅",
+            [
+              "tri",
+              "?a",
+              "?b",
+              "?c"
+            ],
+            [
+              "tri",
+              "?d",
+              "?e",
+              "?f"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "CPCTC",
+        "label": "CPCTC",
+        "premises": [
+          {
+            "line": [
+              "≅",
+              [
+                "tri",
+                "?a",
+                "?b",
+                "?c"
+              ],
+              [
+                "tri",
+                "?d",
+                "?e",
+                "?f"
+              ]
+            ]
+          }
+        ],
+        "conclusions": [
+          [
+            "≅",
+            [
+              "seg",
+              "?a",
+              "?b"
+            ],
+            [
+              "seg",
+              "?d",
+              "?e"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "seg",
+              "?b",
+              "?c"
+            ],
+            [
+              "seg",
+              "?e",
+              "?f"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "seg",
+              "?a",
+              "?c"
+            ],
+            [
+              "seg",
+              "?d",
+              "?f"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "ang",
+              "?b",
+              "?a",
+              "?c"
+            ],
+            [
+              "ang",
+              "?e",
+              "?d",
+              "?f"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "ang",
+              "?a",
+              "?b",
+              "?c"
+            ],
+            [
+              "ang",
+              "?d",
+              "?e",
+              "?f"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "ang",
+              "?a",
+              "?c",
+              "?b"
+            ],
+            [
+              "ang",
+              "?d",
+              "?f",
+              "?e"
+            ]
+          ]
+        ]
+      }
     ],
-
     "figures": [
-      { "id": "bowtie",
-        "params": { "a": "rand(2,5)", "b": "rand(1,4)", "c": "rand(2,5)", "d": "rand(1,4)" },
-        "points": { "E": ["0", "0"], "A": ["-a", "-b"], "C": ["a", "b"], "B": ["-c", "d"], "D": ["c", "-d"] },
+      {
+        "id": "bowtie",
+        "params": {
+          "a": "rand(2,5)",
+          "b": "rand(1,4)",
+          "c": "rand(2,5)",
+          "d": "rand(1,4)"
+        },
+        "points": {
+          "E": [
+            "0",
+            "0"
+          ],
+          "A": [
+            "-a",
+            "-b"
+          ],
+          "C": [
+            "a",
+            "b"
+          ],
+          "B": [
+            "-c",
+            "d"
+          ],
+          "D": [
+            "c",
+            "-d"
+          ]
+        },
         "facts": [
-          ["segment", "A", "C"], ["segment", "B", "D"], ["segment", "A", "B"], ["segment", "C", "D"],
-          ["segment", "A", "E"], ["segment", "E", "C"], ["segment", "B", "E"], ["segment", "E", "D"],
-          ["between", "A", "E", "C"], ["between", "B", "E", "D"]
+          [
+            "segment",
+            "A",
+            "C"
+          ],
+          [
+            "segment",
+            "B",
+            "D"
+          ],
+          [
+            "segment",
+            "A",
+            "B"
+          ],
+          [
+            "segment",
+            "C",
+            "D"
+          ],
+          [
+            "segment",
+            "A",
+            "E"
+          ],
+          [
+            "segment",
+            "E",
+            "C"
+          ],
+          [
+            "segment",
+            "B",
+            "E"
+          ],
+          [
+            "segment",
+            "E",
+            "D"
+          ],
+          [
+            "between",
+            "A",
+            "E",
+            "C"
+          ],
+          [
+            "between",
+            "B",
+            "E",
+            "D"
+          ]
         ],
         "candidateGivens": [
-          ["midpoint", "E", "A", "C"],
-          ["midpoint", "E", "B", "D"],
-          ["≅", ["seg", "A", "E"], ["seg", "C", "E"]],
-          ["≅", ["seg", "B", "E"], ["seg", "D", "E"]]
+          [
+            "midpoint",
+            "E",
+            "A",
+            "C"
+          ],
+          [
+            "midpoint",
+            "E",
+            "B",
+            "D"
+          ],
+          [
+            "≅",
+            [
+              "seg",
+              "A",
+              "E"
+            ],
+            [
+              "seg",
+              "C",
+              "E"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "seg",
+              "B",
+              "E"
+            ],
+            [
+              "seg",
+              "D",
+              "E"
+            ]
+          ]
         ],
         "goals": [
-          ["≅", ["tri", "A", "E", "B"], ["tri", "C", "E", "D"]],
-          ["≅", ["seg", "A", "B"], ["seg", "C", "D"]]
-        ] },
-
-      { "id": "kite",
-        "params": { "a": "rand(2,5)", "b": "rand(1,4)", "d": "rand(1,4)" },
-        "points": { "A": ["-a", "0"], "C": ["a", "0"], "B": ["0", "b"], "D": ["0", "-d"] },
+          [
+            "≅",
+            [
+              "tri",
+              "A",
+              "E",
+              "B"
+            ],
+            [
+              "tri",
+              "C",
+              "E",
+              "D"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "seg",
+              "A",
+              "B"
+            ],
+            [
+              "seg",
+              "C",
+              "D"
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "kite",
+        "params": {
+          "a": "rand(2,5)",
+          "b": "rand(1,4)",
+          "d": "rand(1,4)"
+        },
+        "points": {
+          "A": [
+            "-a",
+            "0"
+          ],
+          "C": [
+            "a",
+            "0"
+          ],
+          "B": [
+            "0",
+            "b"
+          ],
+          "D": [
+            "0",
+            "-d"
+          ]
+        },
         "facts": [
-          ["segment", "A", "B"], ["segment", "B", "C"], ["segment", "C", "D"], ["segment", "D", "A"], ["segment", "B", "D"]
+          [
+            "segment",
+            "A",
+            "B"
+          ],
+          [
+            "segment",
+            "B",
+            "C"
+          ],
+          [
+            "segment",
+            "C",
+            "D"
+          ],
+          [
+            "segment",
+            "D",
+            "A"
+          ],
+          [
+            "segment",
+            "B",
+            "D"
+          ]
         ],
         "candidateGivens": [
-          ["≅", ["seg", "A", "B"], ["seg", "C", "B"]],
-          ["≅", ["seg", "A", "D"], ["seg", "C", "D"]]
+          [
+            "≅",
+            [
+              "seg",
+              "A",
+              "B"
+            ],
+            [
+              "seg",
+              "C",
+              "B"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "seg",
+              "A",
+              "D"
+            ],
+            [
+              "seg",
+              "C",
+              "D"
+            ]
+          ]
         ],
         "goals": [
-          ["≅", ["tri", "A", "B", "D"], ["tri", "C", "B", "D"]],
-          ["≅", ["ang", "A", "B", "D"], ["ang", "C", "B", "D"]]
-        ] }
+          [
+            "≅",
+            [
+              "tri",
+              "A",
+              "B",
+              "D"
+            ],
+            [
+              "tri",
+              "C",
+              "B",
+              "D"
+            ]
+          ],
+          [
+            "≅",
+            [
+              "ang",
+              "A",
+              "B",
+              "D"
+            ],
+            [
+              "ang",
+              "C",
+              "B",
+              "D"
+            ]
+          ]
+        ]
+      }
     ]
   },
-
   "problems": {
     "proof": {
       "params": {
-        "mode":     { "type": "enum", "values": ["build", "fillIn"], "default": "build" },
-        "minSteps": { "type": "int", "min": 2, "max": 12, "default": 4 },
-        "maxSteps": { "type": "int", "min": 3, "max": 14, "default": 8 }
+        "mode": {
+          "type": "enum",
+          "values": [
+            "build",
+            "fillIn"
+          ],
+          "default": "build"
+        },
+        "minSteps": {
+          "type": "int",
+          "min": 2,
+          "max": 12,
+          "default": 4
+        },
+        "maxSteps": {
+          "type": "int",
+          "min": 3,
+          "max": 14,
+          "default": 8
+        }
       },
-
       "generate": [
-        { "set": "fig",    "to": "pick(figures)" },
-        { "set": "vals",   "to": "mapValues(fig.params, e => calc(e))" },
-        { "set": "pts",    "to": "realize(fig.points, vals)" },
-        { "require": "all(fig.candidateGivens, g => holds(g, pts)) && all(fig.goals, g => holds(g, pts))" },
-        { "set": "goal",   "to": "pick(fig.goals)" },
-        { "set": "givens", "to": "minimalGivens(rules, fig.candidateGivens, fig.facts, goal, canon)" },
-        { "set": "witness","to": "proof(rules, givens, goal, fig.facts, canon)" },
-        { "require": "witness != null && count(witness) >= minSteps && count(witness) <= maxSteps" },
-        { "set": "relabel", "to": "randomLabels(keys(fig.points))" },
-        { "apply": "relabel", "to": ["pts", "givens", "goal", "witness", "fig.facts"] }
+        {
+          "set": "fig",
+          "to": "pick(figures)"
+        },
+        {
+          "set": "vals",
+          "to": "mapValues(fig.params, e => calc(e))"
+        },
+        {
+          "set": "pts",
+          "to": "realize(fig.points, vals)"
+        },
+        {
+          "require": "all(fig.candidateGivens, g => holds(g, pts)) && all(fig.goals, g => holds(g, pts))"
+        },
+        {
+          "set": "goal",
+          "to": "pick(fig.goals)"
+        },
+        {
+          "set": "givens",
+          "to": "minimalGivens(rules, fig.candidateGivens, fig.facts, goal, canon)"
+        },
+        {
+          "set": "witness",
+          "to": "proof(rules, givens, goal, fig.facts, canon)"
+        },
+        {
+          "require": "witness != null && count(witness) >= minSteps && count(witness) <= maxSteps"
+        },
+        {
+          "set": "relabel",
+          "to": "randomLabels(keys(fig.points))"
+        },
+        {
+          "apply": "relabel",
+          "to": [
+            "pts",
+            "givens",
+            "goal",
+            "witness",
+            "fig.facts"
+          ]
+        }
       ],
       "key": "fig.id + show(goal, grammar) + show(givens, grammar)",
-
       "scene": {
-        "size": [360, 260],
+        "size": [
+          360,
+          260
+        ],
         "items": [
-          { "each": "f in fig.facts", "if": "f[0] == 'segment'", "draw": "line", "from": "pts[f[1]]", "to": "pts[f[2]]" },
-          { "each": "name in keys(pts)", "draw": "label", "at": "pts[name]", "text": "name", "offset": "outward" }
+          {
+            "each": "f in fig.facts",
+            "if": "f[0] == 'segment'",
+            "draw": "line",
+            "from": "pts[f[1]]",
+            "to": "pts[f[2]]"
+          },
+          {
+            "each": "name in keys(pts)",
+            "draw": "label",
+            "at": "pts[name]",
+            "text": "name",
+            "offset": "outward"
+          }
         ]
       },
-
       "prompt": "Given: {join(map(givens, g => show(g, grammar)), '; ')}.\nProve: {show(goal, grammar)}.",
-
       "input": {
         "type": "stepChain",
         "mode": "mode",
         "points": "keys(pts)",
         "statement": "grammar",
         "reasons": "rules",
-        "cites": { "to": "lines", "max": 3 },
+        "cites": {
+          "to": "lines",
+          "max": 3
+        },
         "prefill": "mode == 'fillIn' ? map(witness, w => ({stmt: w.stmt})) : []",
         "maxLines": "count(witness) + 3"
       },
-
       "derive": {
         "j": "ln => justify(ln, s.lines, rules, givens, fig.facts, canon)"
       },
-
       "check": [
-        { "id": "line", "each": "s.lines", "as": "ln", "pts": 1, "capPts": "count(witness)",
+        {
+          "id": "line",
+          "each": "s.lines",
+          "as": "ln",
+          "pts": 1,
+          "capPts": "count(witness)",
           "test": "j(ln).ok",
           "blame": "ln.n",
-          "msg": "Line {ln.n}: {j(ln).why}" },
-        { "id": "goal", "pts": 2,
+          "msg": "Line {ln.n}: {j(ln).why}"
+        },
+        {
+          "id": "goal",
+          "pts": 2,
           "test": "any(s.lines, ln => matches(ln.stmt, goal, canon) && j(ln).ok)",
-          "msg": "No justified line states what you were asked to prove: {show(goal, grammar)}." }
+          "msg": "No justified line states what you were asked to prove: {show(goal, grammar)}."
+        }
       ],
-
-      "explain": [
-        { "show": "witnessProof", "from": "witness", "format": "twoColumn" }
-      ],
-
+      "explain": [],
       "selftest": {
-        "n": 60,
-        "witnessAsAnswer": true,
+        "n": 4,
+        "witnessAsAnswer": "{lines: witness}",
         "corrupt": [
-          { "name": "wrong reason on one line", "mutate": "swapReason(s, pick(rules).id)", "mustFail": ["line"] },
-          { "name": "drop a middle line",       "mutate": "dropLine(s, randint(1, count(s.lines) - 2))", "mustFail": ["line", "goal"] },
-          { "name": "cite a later line",        "mutate": "citeForward(s)", "mustFail": ["line"] }
+          {
+            "name": "wrong reason on one line",
+            "mutate": "swapReason(s, pick(rules).id)",
+            "mustFail": [
+              "line"
+            ]
+          },
+          {
+            "name": "drop a middle line",
+            "mutate": "dropLine(s, randint(1, count(s.lines) - 2))",
+            "mustFail": [
+              "line",
+              "goal"
+            ]
+          },
+          {
+            "name": "cite a later line",
+            "mutate": "citeForward(s)",
+            "mustFail": [
+              "line"
+            ]
+          }
         ]
-      }
+      },
+      "answer": "join(map(witness, w => w.n + '. ' + show(w.stmt, grammar) + ' (' + w.reason + (count(w.cites) > 0 ? ' ' + join(w.cites, ',') : '') + ')'), '  ')"
     }
   }
 }

@@ -1,8 +1,7 @@
 # Problem engine: design draft v1
 
-Status: first slice implemented in `problems.js` (interpreter, pack loader, self-test, `mathExpr` input, Problems level).
-Only `calc.integrals` runs today. `chem.lewis` and `geometry.congruence` are rejected on upload with a clear message until
-the `structure` and `stepChain` inputs exist. Prompts use plain text (no KaTeX).
+Status: implemented. See `API.md` for the reference. All ten input types and the solver, proof checker and unit/CAS helpers run;
+the six packs in `packs/` pass their self-tests and were driven through the real screens in a simulated browser.
 
 ## 1. Principle
 

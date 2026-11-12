@@ -1,0 +1,96 @@
+{
+  "pack": "graph.paths",
+  "version": 1,
+  "title": "Draw the graph",
+  "engine": ">=1",
+  "level": "HS to uni",
+  "problems": {
+    "build": {
+      "params": {
+        "nodes": {
+          "type": "int",
+          "min": 4,
+          "max": 6,
+          "default": 5
+        }
+      },
+      "generate": [
+        {
+          "set": "n",
+          "to": "nodes"
+        },
+        {
+          "set": "names",
+          "to": "slice(['A','B','C','D','E','F'], 0, n)"
+        },
+        {
+          "set": "order",
+          "to": "shuffle(names)"
+        },
+        {
+          "set": "want",
+          "to": "map(range(n - 1), i => sortBy([order[i], order[i + 1]], x => x))"
+        },
+        {
+          "set": "items",
+          "to": "map(range(n), i => ({id: names[i], at: [cos(6.2832 * i / n), sin(6.2832 * i / n)], label: names[i]}))"
+        }
+      ],
+      "key": "join(order, '')",
+      "prompt": "Draw a path that visits the nodes in this order: {join(order, ' → ')}. Join each pair of neighbours.",
+      "input": {
+        "type": "scene",
+        "mode": "connect",
+        "items": "items",
+        "plane": {
+          "x": [
+            -1.5,
+            1.5
+          ],
+          "y": [
+            -1.5,
+            1.5
+          ]
+        }
+      },
+      "derive": {
+        "has": "e => any(s.edges, x => x[0] == e[0] && x[1] == e[1])"
+      },
+      "check": [
+        {
+          "id": "edges",
+          "pts": 2,
+          "blame": "filter(want, e => !has(e))",
+          "msg": "Some joins are missing: {join(map(blame, e => join(e, '–')), ', ')}."
+        },
+        {
+          "id": "extra",
+          "pts": 1,
+          "test": "count(s.edges) == count(want)",
+          "msg": "Remove the extra joins."
+        }
+      ],
+      "answer": "join(map(want, e => join(e, '–')), ', ')",
+      "selftest": {
+        "n": 10,
+        "witnessAsAnswer": "{edges: want}",
+        "corrupt": [
+          {
+            "name": "missing join",
+            "mutate": "{edges: slice(s.edges, 1)}",
+            "mustFail": [
+              "edges"
+            ]
+          },
+          {
+            "name": "extra join",
+            "mutate": "{edges: concat(s.edges, [['A', 'F']])}",
+            "mustFail": [
+              "extra"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

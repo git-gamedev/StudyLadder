@@ -145,3 +145,19 @@ select{font:600 1rem Lora,Georgia,serif;color:var(--ink);background:var(--panel)
 .mtb .mtx.good{opacity:1;cursor:default}.mtx.good .grip{visibility:hidden}.mtx.good .mtt::after{content:" ✓";color:var(--ok);font-weight:700}
 .mtg{position:fixed;left:0;top:0;z-index:60;pointer-events:none;display:flex;gap:6px;margin:0;text-align:left;background:var(--hl);color:#2a2f38;border:2px solid var(--ink);box-shadow:4px 6px 14px #0006;opacity:.96}
 .mtg .grip{flex:none}
+
+/* problem packs */
+.svgw{margin:.4rem 0}.scn{width:100%;max-width:420px;height:auto;display:block}
+.scn .ln{stroke:var(--ink);stroke-width:2;stroke-linecap:round}.scn .ln.gd{stroke:var(--pen);opacity:.18;stroke-width:1}.scn .ln.ax{stroke:var(--ink);opacity:.6;stroke-width:1.5}.scn .ln.on{stroke:var(--pen);stroke-width:3}
+.scn .bd{stroke:var(--pen);stroke-width:3}.scn .hitl{stroke:transparent;stroke-width:22;cursor:pointer}.scn .cv{stroke:var(--pen);stroke-width:2.5}
+.scn .lb{fill:var(--ink);font:600 17px 'Patrick Hand',system-ui,sans-serif;pointer-events:none}
+.scn .pt{fill:var(--ink)}.scn .pt.on{fill:var(--pen)}
+.scn .node{fill:var(--paper);stroke:var(--ink);stroke-width:2}.scn .node.on{stroke:var(--pen);stroke-width:4}
+.scn .hit,.scn .atom,.scn .slot{cursor:pointer}.scn .sl{fill:transparent;stroke:var(--ink);stroke-width:1.2;stroke-dasharray:3 3;opacity:.45}.scn .slot.on .sl{opacity:.15}.scn .dot{fill:var(--pen)}
+.locked{pointer-events:none;opacity:.85}
+.opts{display:grid;gap:.4rem;margin:.4rem 0}.opt{display:flex;gap:.5rem;align-items:center;cursor:pointer}
+.ord{padding-left:1.4rem}.ord li{margin:.3rem 0}
+.tw{overflow-x:auto}.gr{border-collapse:collapse}.gr th,.gr td{border:1px solid var(--ink);padding:.25rem .5rem;text-align:center}
+.chain .ln2{padding:.4rem 0;border-bottom:1px dashed var(--ink)}.chain .ln2.bad{background:rgba(200,80,40,.12)}.chain select{font:inherit;margin:0 .15rem;max-width:100%}
+.chain .rs{margin:.2rem 0 0 1.4rem}.chain .sub{border-left:2px solid var(--pen);padding-left:.3rem;margin-left:.2rem}.bk.on{background:var(--pen);color:var(--paper)}
+.bk{font:inherit;padding:.1rem .5rem;margin:.1rem;cursor:pointer}.chips{display:flex;flex-wrap:wrap;gap:.2rem;margin:.3rem 0}

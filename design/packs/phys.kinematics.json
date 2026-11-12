@@ -1,0 +1,88 @@
+{
+  "pack": "phys.kinematics",
+  "version": 1,
+  "title": "Speed, units and significant figures",
+  "engine": ">=1",
+  "level": "HS physics",
+  "problems": {
+    "speed": {
+      "params": {
+        "sigfigs": {
+          "type": "bool",
+          "default": true
+        }
+      },
+      "generate": [
+        {
+          "set": "d",
+          "to": "randint(2, 60) * 10"
+        },
+        {
+          "set": "t",
+          "to": "randint(2, 9)"
+        },
+        {
+          "set": "v",
+          "to": "d * 1000 / (t * 3600)"
+        }
+      ],
+      "key": "d + '/' + t",
+      "prompt": "A train covers {d} km in {t} hours at a steady speed. What is its speed in m/s?",
+      "input": {
+        "type": "value",
+        "units": true,
+        "help": "Give a number and unit, for example 12.5 m/s."
+      },
+      "check": [
+        {
+          "id": "parse",
+          "gate": true,
+          "pts": 0,
+          "test": "s.num == s.num",
+          "msg": "Give a number and unit."
+        },
+        {
+          "id": "unit",
+          "pts": 1,
+          "test": "sameDim(s, 'm/s')",
+          "msg": "Speed is a length divided by a time, such as m/s."
+        },
+        {
+          "id": "value",
+          "pts": 2,
+          "test": "approx(inUnit(s, 'm/s'), v, 0.01)",
+          "msg": "Convert km to m (×1000) and hours to s (×3600), then divide."
+        },
+        {
+          "id": "sig",
+          "when": "sigfigs",
+          "pts": 1,
+          "test": "s.sig == 2 || s.sig == 3",
+          "msg": "Give 2 or 3 significant figures, like the data."
+        }
+      ],
+      "answer": "round(v, 2) + ' m/s'",
+      "explain": "v = {d} km ÷ {t} h = {d * 1000} m ÷ {t * 3600} s = {round(v, 2)} m/s.",
+      "selftest": {
+        "n": 20,
+        "witnessAsAnswer": "{text: '', num: v, unit: 'm/s', sig: 3, error: null}",
+        "corrupt": [
+          {
+            "name": "km/h left unconverted",
+            "mutate": "{text: '', num: d / t, unit: 'm/s', sig: 3, error: null}",
+            "mustFail": [
+              "value"
+            ]
+          },
+          {
+            "name": "wrong dimension",
+            "mutate": "{text: '', num: v, unit: 'kg', sig: 3, error: null}",
+            "mustFail": [
+              "unit"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

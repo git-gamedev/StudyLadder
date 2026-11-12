@@ -97,7 +97,7 @@ function add(txt,name,skip){const{a:all,title}=ents(txt,name),a=skip?all.filter(
 const h=hsh(txt);if(LIB.some(x=>x.h==h))return'already in your library.';
 LIB.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title,terms:a,sel:true,h})}
 async function ingest(txt,name){const{a,title}=ents(txt,name);let sk=null;if(!LIB.some(x=>x.h==hsh(txt))){const gs=dups(a,title);if(gs.length)sk=await ask(gs)}return add(txt,name,sk)}
-async function rd(fs){const er=[];for(const f of fs){try{const tx=await f.text(),m=PK.isPack(tx)?PK.add(tx,f.name):await ingest(tx,f.name);if(m)er.push(f.name+' is '+m)}catch(e){er.push(f.name+': '+(e.message||e))}}
+async function rd(fs){const er=[];for(const f of fs){try{const tx=await f.text();$('#er').textContent='Reading '+f.name+'…';await new Promise(r=>setTimeout(r,30));$('#er').textContent='';const k=PK.intake(tx,f.name),m=k.terms?await ingest(tx,f.name):k.msg;if(m)er.push(f.name+' is '+m)}catch(e){er.push(f.name+': '+(e.message||e))}}
 if(!refresh())er.push('Could not save to this browser (storage full or blocked), so these sets will be lost when you leave.');$('#er').textContent=er.join(' ');const fi=$('#fi');if(fi)fi.value=''}
 function buildS(){const sel=LIB.filter(x=>x.sel);if(!sel.length){S=null;return}const m=new Map();
 sel.forEach(x=>x.terms.forEach(t=>{const k=norm(t.term);let e=m.get(k);if(!e){e={...t,defs:[],cs:[],aliases:[]};m.set(k,e)}const kd=norm(t.definition);if(!e.defs.some(d=>norm(d)==kd))e.defs.push(t.definition);if(!e.cs.includes(t.category))e.cs.push(t.category);(t.aliases||[]).forEach(al=>{if(!e.aliases.includes(al))e.aliases.push(al)})}));
